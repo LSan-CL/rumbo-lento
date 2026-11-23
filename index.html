@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#183c36">
+  <title>Rumbo lento — escapadas desde Sant Celoni</title>
+  <meta name="description" content="Un planificador de escapadas tranquilas y económicas desde Sant Celoni, con mapa, presupuesto por grupo e itinerarios flexibles.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <style>
+    :root {
+      --ink: #17231f;
+      --muted: #687670;
+      --green: #21483f;
+      --green-dark: #14332d;
+      --mint: #e9f0e9;
+      --cream: #f7f6f1;
+      --line: #e2e6df;
+      --orange: #e5a56d;
+      --white: #fff;
+      --shadow: 0 18px 48px rgba(24, 48, 40, .12);
+      font-family: "DM Sans", sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; min-width: 320px; }
+    button, input, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { cursor: pointer; }
+    a { color: inherit; text-decoration: none; }
+    .wrap { width: min(1180px, calc(100% - 48px)); margin-inline: auto; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px; color: var(--green);
+      font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    }
+    .eyebrow::before { content: ""; width: 18px; height: 1px; background: currentColor; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, h3 { font-family: Manrope, sans-serif; letter-spacing: -.04em; }
+    h2 { font-size: clamp(30px, 4vw, 48px); line-height: 1.05; margin-bottom: 14px; }
+    .section-intro { color: var(--muted); line-height: 1.7; max-width: 600px; margin-bottom: 0; }
+
+    .topbar { position: absolute; z-index: 20; inset: 0 0 auto; color: white; }
+    .nav { min-height: 82px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; font: 800 17px Manrope, sans-serif; letter-spacing: -.04em; }
+    .brand-mark {
+      display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid #ffffff78;
+      border-radius: 50%; font-size: 17px;
+    }
+    .nav-links { display: flex; align-items: center; gap: 27px; font-size: 12px; color: #ffffffd9; }
+    .nav-links a:hover { color: white; }
+    .nav-cta { padding: 11px 17px; border: 1px solid #ffffff85; border-radius: 24px; font-size: 12px; }
+    .menu-button { display: none; border: 1px solid #ffffff80; color: white; background: transparent; border-radius: 50%; width: 42px; height: 42px; }
+
+    .hero {
+      min-height: 650px; position: relative; display: flex; align-items: center; overflow: hidden;
+      color: white; background: #294f49 url("https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=2200&q=85") center 48% / cover;
+    }
+    .hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(12, 35, 31, .75), rgba(17, 40, 35, .29) 62%, rgba(12, 35, 31, .08)); }
+    .hero::after { content: ""; position: absolute; inset: auto 0 0; height: 140px; background: linear-gradient(transparent, var(--cream)); }
+    .hero-content { position: relative; z-index: 1; padding: 120px 0 120px; max-width: 700px; }
+    .hero .eyebrow { color: #e7c7a6; }
+    .hero h1 { font-size: clamp(43px, 7vw, 78px); line-height: .99; margin: 24px 0 18px; max-width: 710px; }
+    .hero p { color: #f1f3ee; max-width: 520px; font-size: 16px; line-height: 1.7; margin-bottom: 28px; }
+    .hero-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .button {
+      display: inline-flex; justify-content: center; align-items: center; gap: 10px; min-height: 46px; padding: 0 19px;
+      border: 0; border-radius: 30px; background: var(--green); color: white; font-weight: 700; font-size: 12px;
+      transition: transform .18s ease, background .18s ease;
+    }
+    .button:hover { transform: translateY(-2px); background: var(--green-dark); }
+    .button.light { background: white; color: var(--ink); }
+    .button.outline { background: transparent; border: 1px solid #ffffffa8; }
+    .hero-note { display: flex; align-items: center; gap: 9px; font-size: 11px; color: #ffffffd9; margin-top: 27px; }
+    .hero-note span:first-child { color: #f4c38f; font-size: 15px; }
+
+    .intro { padding: 40px 0 78px; text-align: center; }
+    .intro .eyebrow { justify-content: center; }
+    .intro h2 { max-width: 730px; margin: 17px auto 13px; }
+    .intro p { max-width: 710px; margin: 0 auto; color: var(--muted); line-height: 1.75; }
+    .intro-stats { display: flex; justify-content: center; gap: 42px; margin-top: 30px; }
+    .intro-stats div { font-size: 11px; color: var(--muted); }
+    .intro-stats strong { display: block; color: var(--green); font: 700 16px Manrope, sans-serif; margin-bottom: 4px; }
+
+    .planner { padding: 78px 0 90px; background: #eeefe9; }
+    .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 28px; margin-bottom: 30px; }
+    .section-heading .section-intro { max-width: 415px; }
+    .demo-badge { display: inline-flex; align-items: center; gap: 7px; color: #775c36; background: #f5e8d4; border-radius: 20px; padding: 8px 12px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    .planner-layout { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 22px; align-items: start; }
+    .filters {
+      background: white; border: 1px solid var(--line); border-radius: 18px; padding: 22px; position: sticky; top: 16px;
+      box-shadow: 0 8px 24px #29453b0a;
+    }
+    .filter-title { font: 700 14px Manrope, sans-serif; margin-bottom: 16px; }
+    .field-label { display: block; font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 17px 0 8px; }
+    .filters select, .filters input[type="date"] {
+      width: 100%; min-height: 42px; padding: 0 12px; color: var(--ink); background: #fbfcfa;
+      border: 1px solid var(--line); border-radius: 9px; outline: none;
+    }
+    .filters select:focus, .filters input:focus { border-color: #709084; box-shadow: 0 0 0 3px #dceae2; }
+    .leg-box { padding: 12px; background: #f5f7f3; border-radius: 12px; margin-top: 10px; }
+    .leg-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 12px; font-weight: 700; }
+    .leg-head small { font-size: 10px; color: var(--muted); font-weight: 500; }
+    .traveler-control { display: flex; align-items: center; gap: 9px; margin-top: 10px; color: var(--muted); font-size: 11px; }
+    .traveler-control input { width: 76px; height: 38px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: white; color: var(--ink); }
+    .traveler-note { color: var(--muted); font-size: 10px; line-height: 1.5; margin: 12px 0 0; }
+    .budget-readout { display: flex; justify-content: space-between; gap: 10px; align-items: center; font-size: 11px; margin-top: 4px; }
+    input[type="range"] { width: 100%; accent-color: var(--green); }
+    .check-row { display: flex; align-items: center; gap: 9px; font-size: 11px; margin: 9px 0; }
+    .check-row input { accent-color: var(--green); }
+    .filter-reset { color: var(--muted); background: transparent; border: 0; font-size: 10px; padding: 12px 0 0; text-decoration: underline; }
+    .results-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 12px; margin: 4px 0 13px; }
+    .results-head strong { font: 700 13px Manrope, sans-serif; }
+    .api-status { color: var(--muted); font-size: 10px; text-align: right; }
+    .results-head span { color: var(--muted); font-size: 10px; }
+    .destination-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .destination-card { min-width: 0; background: white; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 7px 21px #29453b08; }
+    .card-image { height: 164px; position: relative; background: #a7b6a8 center / cover; }
+    .card-image::after { content: ""; position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, #12251dcc); }
+    .card-label { position: absolute; z-index: 1; top: 12px; left: 12px; background: #fff; padding: 6px 9px; border-radius: 20px; font-size: 9px; font-weight: 700; }
+    .card-title { position: absolute; z-index: 1; left: 15px; right: 12px; bottom: 13px; color: white; font: 700 21px Manrope, sans-serif; }
+    .card-body { padding: 15px; }
+    .card-meta { display: flex; flex-wrap: wrap; gap: 8px 12px; color: var(--muted); font-size: 10px; }
+    .card-body p { min-height: 38px; margin: 10px 0 13px; color: #53625c; font-size: 11px; line-height: 1.55; }
+    .card-cost { display: flex; align-items: end; justify-content: space-between; gap: 10px; padding-top: 11px; border-top: 1px solid #edf0eb; }
+    .card-cost small { display: block; color: var(--muted); font-size: 9px; margin-bottom: 3px; }
+    .card-cost strong { font: 700 14px Manrope, sans-serif; }
+    .card-cost .group-cost { text-align: right; }
+    .card-actions { display: flex; gap: 8px; margin-top: 13px; }
+    .card-actions button { min-height: 35px; flex: 1; padding: 0 9px; font-size: 10px; }
+    .button.small-outline { background: transparent; color: var(--green); border: 1px solid #d5e0d9; }
+    .empty-state { background: white; border-radius: 14px; padding: 35px 20px; text-align: center; color: var(--muted); font-size: 12px; grid-column: 1 / -1; }
+
+    .map-section { padding: 92px 0; }
+    .map-section .section-heading { margin-bottom: 25px; }
+    .map-shell { position: relative; overflow: hidden; background: #dae3d8; border: 1px solid #d5ddd4; border-radius: 20px; height: 430px; box-shadow: var(--shadow); }
+    #map { width: 100%; height: 100%; z-index: 1; }
+    .map-fallback { display: none; place-items: center; text-align: center; padding: 30px; height: 100%; color: var(--green); }
+    .map-fallback p { max-width: 340px; line-height: 1.6; }
+    .map-legend { position: absolute; z-index: 500; left: 14px; bottom: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .map-legend span { background: white; box-shadow: 0 3px 12px #20352c20; border-radius: 20px; padding: 8px 11px; font-size: 10px; }
+    .map-caption { color: var(--muted); font-size: 10px; margin-top: 12px; }
+    .leaflet-popup-content-wrapper { border-radius: 12px; }
+    .popup-title { font: 700 13px Manrope, sans-serif; margin-bottom: 4px; }
+    .popup-copy { font: 11px "DM Sans", sans-serif; color: #586760; }
+
+    .itinerary { padding: 82px 0 90px; background: var(--green-dark); color: white; }
+    .itinerary .eyebrow { color: #d7b995; }
+    .itinerary .section-intro { color: #d0dad4; }
+    .itinerary .section-heading { margin-bottom: 32px; }
+    .itinerary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .itinerary-card { background: #ffffff0d; border: 1px solid #ffffff24; border-radius: 17px; padding: 23px; }
+    .itinerary-card h3 { font-size: 18px; margin-bottom: 8px; }
+    .itinerary-card > p { font-size: 11px; color: #c6d3cc; line-height: 1.65; }
+    .timeline { list-style: none; margin: 20px 0 0; padding: 0; }
+    .timeline li { display: grid; grid-template-columns: 56px 1fr; gap: 12px; padding: 13px 0; border-top: 1px solid #ffffff21; }
+    .timeline time { color: #e3c9a9; font-size: 10px; font-weight: 700; padding-top: 2px; }
+    .timeline strong { display: block; font-size: 11px; margin-bottom: 3px; }
+    .timeline span { display: block; color: #c6d3cc; font-size: 10px; line-height: 1.5; }
+    .itinerary-note { display: flex; justify-content: space-between; gap: 20px; align-items: center; padding: 17px 19px; margin-top: 20px; background: #ffffff10; border-radius: 12px; }
+    .itinerary-note p { color: #d4dfd8; font-size: 10px; line-height: 1.6; margin: 0; max-width: 720px; }
+    .itinerary-note strong { color: white; }
+
+    .date-block { margin-top: 12px; padding: 12px; border: 1px solid #ead8c2; border-radius: 11px; background: #fbf3e8; color: #655640; font-size: 10px; line-height: 1.55; }
+    .date-block strong { display: block; color: #493b29; font-size: 11px; margin-bottom: 3px; }
+    .events { padding: 84px 0; background: #eeefe9; }
+    .event-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 28px; }
+    .event-card { display: flex; flex-direction: column; min-height: 235px; padding: 21px; border: 1px solid var(--line); border-radius: 16px; background: white; }
+    .event-date { color: #92643d; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .event-card h3 { font-size: 17px; margin: 11px 0 8px; }
+    .event-card p { color: var(--muted); font-size: 11px; line-height: 1.65; margin-bottom: 15px; }
+    .event-status { align-self: flex-start; margin-top: auto; padding: 6px 9px; border-radius: 14px; background: #f4eddf; color: #765a37; font-size: 9px; font-weight: 700; }
+    .event-link { margin-top: 14px; color: var(--green); font-size: 10px; font-weight: 700; }
+    .event-link:hover { text-decoration: underline; }
+    .events-note { margin: 17px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+
+    .tips { padding: 84px 0; }
+    .tip-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 28px; }
+    .tip-card { padding: 23px; border: 1px solid var(--line); border-radius: 16px; background: white; }
+    .tip-kicker { color: #92643d; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .tip-card h3 { font-size: 17px; margin: 10px 0 8px; }
+    .tip-card p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+    .tip-source { display: inline-block; margin-top: 13px; color: var(--green); font-size: 10px; font-weight: 700; }
+    .tip-source:hover { text-decoration: underline; }
+    .tips-note { margin: 17px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+
+    .black-friday { padding: 88px 0; }
+    .bf-card { display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border-radius: 20px; background: #e9e9df; }
+    .bf-copy { padding: clamp(28px, 5vw, 58px); }
+    .bf-copy h2 { font-size: clamp(28px, 4vw, 43px); margin: 16px 0 13px; }
+    .bf-copy p { color: var(--muted); font-size: 12px; line-height: 1.7; max-width: 440px; }
+    .bf-points { display: grid; gap: 10px; padding: 0; list-style: none; margin: 20px 0 24px; color: #45554d; font-size: 11px; }
+    .bf-points li::before { content: "✓"; display: inline-grid; place-items: center; width: 17px; height: 17px; background: #d7e2d7; color: var(--green); border-radius: 50%; margin-right: 8px; font-weight: 700; }
+    .bf-visual { position: relative; min-height: 350px; background: #8b9b8e url("https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=80") center / cover; }
+    .bf-visual::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #203b3328, #142d2766); }
+    .bf-note { position: absolute; z-index: 1; right: 22px; bottom: 22px; max-width: 215px; padding: 15px; border-radius: 12px; color: white; background: #173d35e8; font-size: 10px; line-height: 1.6; }
+    .bf-note strong { display: block; font: 700 14px Manrope, sans-serif; margin-bottom: 5px; }
+
+    .faq { padding: 72px 0 88px; background: #efefe9; }
+    .faq-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 55px; }
+    .faq-list details { padding: 17px 0; border-bottom: 1px solid #d8ded7; }
+    .faq-list summary { list-style: none; cursor: pointer; font: 700 12px Manrope, sans-serif; display: flex; justify-content: space-between; gap: 20px; }
+    .faq-list summary::-webkit-details-marker { display: none; }
+    .faq-list summary::after { content: "+"; color: var(--green); font-size: 17px; line-height: 12px; }
+    .faq-list details[open] summary::after { content: "−"; }
+    .faq-list details p { margin: 12px 28px 0 0; color: var(--muted); font-size: 11px; line-height: 1.7; }
+
+    footer { padding: 28px 0; background: #122a25; color: #d4dfd8; }
+    .footer-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+    footer .brand { color: white; font-size: 14px; }
+    footer p { margin: 0; font-size: 9px; color: #aebeb5; }
+    .toast { position: fixed; z-index: 1000; left: 50%; bottom: 22px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; transition: .2s ease; background: #173d35; color: white; border-radius: 30px; padding: 12px 18px; font-size: 11px; box-shadow: var(--shadow); }
+    .toast.show { transform: translate(-50%, 0); opacity: 1; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+    @media (max-width: 900px) {
+      .planner-layout { grid-template-columns: 260px minmax(0, 1fr); gap: 14px; }
+      .filters { padding: 17px; }
+      .destination-grid { gap: 10px; }
+      .card-image { height: 140px; }
+      .nav-links { gap: 16px; }
+    }
+    @media (max-width: 700px) {
+      .wrap { width: min(100% - 32px, 560px); }
+      .nav { min-height: 68px; }
+      .nav-links { display: none; position: absolute; top: 61px; left: 16px; right: 16px; padding: 18px; border-radius: 14px; background: #14332df5; flex-direction: column; align-items: stretch; gap: 18px; }
+      .nav-links.open { display: flex; }
+      .nav-cta { text-align: center; }
+      .menu-button { display: block; }
+      .hero { min-height: 620px; background-position: 58% center; }
+      .hero-content { padding: 112px 0 105px; }
+      .hero h1 { font-size: clamp(43px, 13vw, 66px); }
+      .hero p { font-size: 14px; }
+      .intro { padding: 25px 0 62px; }
+      .intro-stats { gap: 18px; }
+      .intro-stats div { max-width: 100px; line-height: 1.4; }
+      .section-heading { display: block; }
+      .section-heading .section-intro { margin-top: 12px; }
+      .demo-badge { margin-top: 16px; }
+      .planner { padding: 62px 0; }
+      .planner-layout { grid-template-columns: 1fr; }
+      .filters { position: static; }
+      .destination-grid { grid-template-columns: 1fr; }
+      .card-image { height: 190px; }
+      .map-section { padding: 65px 0; }
+      .map-shell { height: 360px; }
+      .itinerary { padding: 65px 0; }
+      .itinerary-grid, .event-grid, .tip-grid, .bf-card, .faq-grid { grid-template-columns: 1fr; }
+      .itinerary-note { align-items: start; flex-direction: column; }
+      .events { padding: 65px 0; }
+      .tips { padding: 65px 0; }
+      .bf-visual { min-height: 250px; grid-row: 1; }
+      .black-friday { padding: 65px 0; }
+      .faq { padding: 60px 0; }
+      .faq-grid { gap: 25px; }
+      .footer-row { align-items: start; flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <nav class="nav wrap" aria-label="Navegación principal">
+      <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true">↗</span> rumbo lento</a>
+      <div class="nav-links" id="navLinks">
+        <a href="#inicio">Inicio</a>
+        <a href="#explorar">Destinos</a>
+        <a href="#mapa">Mapa</a>
+        <a href="#rutas">Rutas</a>
+        <a href="#eventos">Eventos</a>
+        <a href="#tips">Consejos</a>
+        <a href="#ofertas">Ofertas</a>
+        <a class="nav-cta" href="#explorar">Armar mi viaje&nbsp; ↗</a>
+      </div>
+      <button class="menu-button" id="menuButton" aria-label="Abrir menú" aria-expanded="false">☰</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="wrap hero-content">
+        <span class="eyebrow">Viajes a tu ritmo · desde Sant Celoni</span>
+        <h1>Más lugares.<br>Menos apuro.</h1>
+        <p>Escapadas bonitas y cuidadas para el bolsillo. Compara trenes y buses, adapta el viaje a tu grupo y descubre cuánto podría costar.</p>
+        <div class="hero-actions">
+          <a class="button light" href="#explorar">Explorar destinos <span aria-hidden="true">↗</span></a>
+          <a class="button outline" href="#rutas">Ver ideas de ruta</a>
+        </div>
+        <div class="hero-note"><span aria-hidden="true">✦</span><span>Del 29 ene al 14 feb · invierno 2027 · plan flexible</span></div>
+      </div>
+    </section>
+
+    <section class="intro wrap" aria-labelledby="introTitle">
+      <span class="eyebrow">Viajar bien, sin complicarlo</span>
+      <h2 id="introTitle">Un viaje pensado para disfrutar en grupo</h2>
+      <p>Desde una excursión cercana hasta unos días en otra ciudad: elige el ritmo, mira los trayectos y calcula el presupuesto según cuántas personas viajan en cada tramo.</p>
+      <div class="intro-stats">
+        <div><strong>1–9 personas</strong>grupo flexible</div>
+        <div><strong>Tren o bus</strong>sin depender del avión</div>
+        <div><strong>A tu ritmo</strong>pausas y accesibilidad</div>
+      </div>
+    </section>
+
+    <section class="planner" id="explorar">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Tu viaje, a tu manera</span>
+            <h2>Encuentra tu próxima escapada</h2>
+            <p class="section-intro">Filtra por presupuesto, intereses y ritmo. El total del grupo se ajusta según la cantidad de viajeros de cada tramo.</p>
+          </div>
+          <span class="demo-badge">● API conectada · costes de muestra, no tarifas vigentes</span>
+        </div>
+        <div class="planner-layout">
+          <aside class="filters" aria-label="Filtros y viajeros">
+            <div class="filter-title">Personaliza la búsqueda</div>
+            <div class="leg-box">
+              <div class="leg-head"><label for="travelerCount">Personas en el grupo</label><small>1–9</small></div>
+              <div class="traveler-control"><input id="travelerCount" type="number" min="1" max="9" value="4" aria-label="Número de personas en el grupo"><span>viajeros</span></div>
+            </div>
+            <div class="date-block"><strong>6–8 feb · fechas fuera del plan</strong>Visita familiar en Malta. El planificador no propondrá salidas ni actividades esos días.</div>
+
+            <label class="field-label" for="maxBudget">Presupuesto de transporte y visitas · por persona</label>
+            <div class="budget-readout"><span>Hasta</span><strong id="budgetValue">€100</strong></div>
+            <input id="maxBudget" type="range" min="10" max="200" step="5" value="100" aria-label="Presupuesto máximo por persona">
+
+            <label class="field-label" for="interestSelect">Interés principal</label>
+            <select id="interestSelect">
+              <option value="all">Todos los planes</option>
+              <option value="shopping">Compras</option>
+              <option value="culture">Cultura e historia</option>
+              <option value="nature">Naturaleza y paisajes</option>
+              <option value="easy">Paseo tranquilo</option>
+            </select>
+            <label class="field-label" for="transportSelect">Cómo moverse</label>
+            <select id="transportSelect">
+              <option value="all">Tren o bus</option>
+              <option value="train">Preferir tren</option>
+              <option value="bus">Preferir bus</option>
+            </select>
+            <label class="check-row"><input type="checkbox" id="easyOnly"> Priorizar accesibilidad y pocas caminatas</label>
+            <button class="filter-reset" id="resetFilters" type="button">Restablecer filtros</button>
+          </aside>
+
+          <div>
+            <div class="results-head"><strong id="resultsTitle">Escapadas cerca y un poco más allá</strong><span class="api-status" id="apiStatus" role="status" aria-live="polite">Conectando con el catálogo…</span><span id="resultsCount" aria-live="polite"></span></div>
+            <div class="destination-grid" id="destinationGrid"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="map-section wrap" id="mapa">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">Todo empieza cerca</span>
+          <h2>Explora el mapa</h2>
+          <p class="section-intro">Mira las distancias de un vistazo y abre cada punto para ver una idea de visita. Las rutas reales dependen del horario del día.</p>
+        </div>
+      </div>
+      <div class="map-shell">
+        <div id="map" role="application" aria-label="Mapa de destinos desde Sant Celoni"></div>
+        <div class="map-fallback" id="mapFallback">
+          <div><strong>El mapa no se pudo cargar.</strong><p>Comprueba tu conexión. Mientras tanto, puedes explorar los destinos en la lista.</p></div>
+        </div>
+        <div class="map-legend"><span>● Base: Sant Celoni</span><span>● Excursiones y escapadas</span></div>
+      </div>
+      <p class="map-caption">Mapa © OpenStreetMap contributors. Para usarlo se necesita conexión a internet.</p>
+    </section>
+
+    <section class="itinerary" id="rutas">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Inspiración para empezar</span>
+            <h2>Dos maneras de viajar sin correr</h2>
+            <p class="section-intro">Ideas de ejemplo: antes de salir, confirma horarios, accesos, cierres de invierno y tarifas.</p>
+          </div>
+        </div>
+        <div class="itinerary-grid">
+          <article class="itinerary-card">
+            <h3>Girona en un día</h3>
+            <p>Una salida sencilla desde Sant Celoni, con tiempo para pasear, comer y volver sin sumar una noche de hotel.</p>
+            <ul class="timeline">
+              <li><time>MAÑANA</time><div><strong>Tren a Girona</strong><span>Revisar el horario directo o las conexiones disponibles para ese día.</span></div></li>
+              <li><time>MEDIODÍA</time><div><strong>Casco antiguo y pausa larga</strong><span>Elegir un recorrido corto; algunas calles tienen adoquines y desniveles.</span></div></li>
+              <li><time>TARDE</time><div><strong>Tiendas y regreso</strong><span>Tiempo libre por el centro y vuelta en tren según el horario elegido.</span></div></li>
+            </ul>
+          </article>
+          <article class="itinerary-card">
+            <h3>Barcelona con calma</h3>
+            <p>Una ciudad para combinar compras, paseo y descanso. Mejor elegir una zona por día en vez de intentar verlo todo.</p>
+            <ul class="timeline">
+              <li><time>DÍA 1</time><div><strong>Llegada y paseo corto</strong><span>Dejar las maletas, comer cerca y conocer el barrio del alojamiento.</span></div></li>
+              <li><time>DÍA 2</time><div><strong>Centro y compras</strong><span>Plan con paradas en cafeterías, baños accesibles y transporte urbano.</span></div></li>
+              <li><time>DÍA 3</time><div><strong>Una visita cercana</strong><span>Escoger solo una salida y volver con margen para descansar.</span></div></li>
+            </ul>
+          </article>
+        </div>
+        <div class="itinerary-note">
+          <p><strong>6–8 de febrero · fechas bloqueadas:</strong> visita familiar en Malta. No se incluirán salidas ni actividades en la planificación de esos días.</p>
+          <a class="button light" href="#eventos">Ver eventos y actividades ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="events" id="eventos">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Agenda para inspirar el viaje</span>
+            <h2>Eventos y planes entretenidos</h2>
+            <p class="section-intro">Ideas en Barcelona, Sant Celoni y Girona. La programación de enero–febrero de 2027 aún no está completa: confirma fechas, horarios, accesos y precios antes de ir.</p>
+          </div>
+          <span class="demo-badge">Agenda 2027 · por confirmar</span>
+        </div>
+        <div class="event-grid">
+          <article class="event-card">
+            <span class="event-date">Barcelona · alrededor del 12 de febrero</span>
+            <h3>Fiestas de Santa Eulàlia</h3>
+            <p>Fiesta mayor de invierno con cultura popular, gigantes, bestiario, castellers y actividades familiares. La página oficial consultada anuncia la edición 2026; el programa 2027 está pendiente.</p>
+            <span class="event-status">Candidata para el 12–14 feb</span>
+            <a class="event-link" href="https://www.barcelona.cat/santaeulalia/en" target="_blank" rel="noopener noreferrer">Consultar la web oficial ↗</a>
+          </article>
+          <article class="event-card">
+            <span class="event-date">Sant Celoni y Baix Montseny</span>
+            <h3>Teatro, música y actividades locales</h3>
+            <p>El Ateneu y la agenda municipal publican propuestas culturales y familiares durante el año. Vale la pena revisar la cartelera para los días concretos del viaje.</p>
+            <span class="event-status">Fechas del viaje por publicar</span>
+            <a class="event-link" href="https://santceloni.cat/agenda.php" target="_blank" rel="noopener noreferrer">Agenda oficial de Sant Celoni ↗</a>
+          </article>
+          <article class="event-card">
+            <span class="event-date">Girona · excursión de un día</span>
+            <h3>Exposiciones y actividades de ciudad</h3>
+            <p>Además del casco histórico, se pueden buscar exposiciones, visitas y actividades culturales para el día elegido. La agenda municipal permite comprobar qué coincide con la visita.</p>
+            <span class="event-status">Revisar agenda antes de salir</span>
+            <a class="event-link" href="https://web2.girona.cat/agenda/cat/agenda.php" target="_blank" rel="noopener noreferrer">Agenda oficial de Girona ↗</a>
+          </article>
+        </div>
+        <p class="events-note">Del 6 al 8 de febrero no se sugerirán planes: esas fechas quedan reservadas para la visita familiar en Malta. Los eventos cercanos a esos días se mostrarán solo si ocurren fuera del bloqueo.</p>
+      </div>
+    </section>
+
+    <section class="tips" id="tips">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Pequeños trucos que suman</span>
+            <h2>Ahorrar y comer rico</h2>
+            <p class="section-intro">Consejos sencillos para comparar el transporte y probar algo local sin disparar el presupuesto.</p>
+          </div>
+        </div>
+        <div class="tip-grid">
+          <article class="tip-card">
+            <span class="tip-kicker">Economía · tren</span>
+            <h3>Sant Celoni–Barcelona: comparen el billete de 10 viajes</h3>
+            <p>Si los cuatro hacen el mismo trayecto, comparen un título de 10 viajes compartible con comprar cuatro idas y vueltas. En la web de Rodalies, la opción de 10 viajes permite uso por varias personas para el mismo origen y destino. El T-usual de 30 días es personal: solo conviene si esa persona hará bastantes viajes. Revisen zonas, condiciones y tarifa vigente antes de comprar.</p>
+            <a class="tip-source" href="https://rodalies.gencat.cat/en/tarifes/servei_rodalia_barcelona/nomes_rodalies/" target="_blank" rel="noopener noreferrer">Condiciones de Rodalies ↗</a>
+            <a class="tip-source" href="https://rodalies.gencat.cat/en/tarifes/servei_rodalia_barcelona/servei_integrat_atm/" target="_blank" rel="noopener noreferrer">Abonos integrados y zonas ↗</a>
+          </article>
+          <article class="tip-card">
+            <span class="tip-kicker">Economía · comida</span>
+            <h3>Busquen menú del día y compartan una pausa</h3>
+            <p>En días laborables, comparen el menú del día en calles de barrio, alejadas de las zonas más turísticas. Miren qué incluye (bebida, postre y café) y revisen el precio antes de sentarse. Para una merienda, una panadería o mercado local suele ser más económico que comer junto a una atracción.</p>
+          </article>
+          <article class="tip-card">
+            <span class="tip-kicker">Gastronomía · invierno catalán</span>
+            <h3>Si encuentran calçots, pregunten por el menú completo</h3>
+            <p>Entre invierno y comienzos de primavera es temporada de calçots. La calçotada puede ser una comida entretenida para compartir, pero el menú cerrado no siempre es barato: comparen el precio total por persona, bebidas y transporte, y reserven con antelación.</p>
+          </article>
+          <article class="tip-card">
+            <span class="tip-kicker">Gastronomía · Girona y Vic</span>
+            <h3>Prueben algo típico sin convertirlo en una comida cara</h3>
+            <p>En Girona, busquen un xuixo en una pastelería como merienda; en Vic, llonganissa de Vic en una tienda local o mercado. Comprar una porción o llevar algo para compartir permite probar productos de la zona sin pagar una comida turística completa.</p>
+          </article>
+        </div>
+        <p class="tips-note">Los títulos de transporte, las zonas y las tarifas pueden cambiar. Estos consejos son una guía para comparar; no sustituyen la comprobación de las condiciones oficiales para la fecha del viaje.</p>
+      </div>
+    </section>
+
+    <section class="black-friday" id="ofertas">
+      <div class="wrap">
+        <div class="bf-card">
+          <div class="bf-copy">
+            <span class="eyebrow">Precios claros, sin falsas promesas</span>
+            <h2>Que una oferta sea una oferta de verdad</h2>
+            <p>La API ya organiza el catálogo y aplica los filtros, pero aún no consulta tarifas de operadores. Cuando integremos fuentes verificables, podremos guardar precios observados y compararlos con posibles ofertas de Black Friday.</p>
+            <ul class="bf-points">
+              <li>Fecha de consulta y enlace a la tarifa</li>
+              <li>Precio por persona y total para el grupo de ese tramo</li>
+              <li>Alojamiento, transporte y entradas por separado</li>
+            </ul>
+            <a class="button" href="#explorar">Probar el planificador <span aria-hidden="true">↗</span></a>
+          </div>
+          <div class="bf-visual" role="img" aria-label="Escaparates de una calle comercial">
+            <div class="bf-note"><strong>Black Friday · seguimiento futuro</strong>Las ofertas no están activas todavía. El sistema no marcará un descuento hasta tener un precio verificable.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="faq">
+      <div class="wrap faq-grid">
+        <div>
+          <span class="eyebrow">Antes de planificar</span>
+          <h2>Preguntas importantes</h2>
+          <p class="section-intro">El viaje ideal también tiene en cuenta lo que no se ve en una foto: accesos, descansos y costes finales.</p>
+        </div>
+        <div class="faq-list">
+          <details open>
+            <summary>¿Los precios de esta versión son actuales?</summary>
+            <p>No. Son importes de demostración para enseñar cómo se calcula el coste por persona y grupo. Antes de reservar, hay que consultar los operadores; cuando integremos tarifas verificables, se indicará su fuente y fecha de actualización.</p>
+          </details>
+          <details>
+            <summary>¿Puedo cambiar cuántas personas viajan en cada tramo?</summary>
+            <p>Sí. Indica el total del grupo, de 1 a 9 personas; el presupuesto se calcula con esa cantidad.</p>
+          </details>
+          <details>
+            <summary>¿Por qué aparece Malta en el calendario?</summary>
+            <p>Malta no es un destino para planificar en esta web. Solo se bloquean del 6 al 8 de febrero para que no se propongan salidas esos días.</p>
+          </details>
+          <details>
+            <summary>¿Los eventos de 2027 ya están confirmados?</summary>
+            <p>No todos. La web enlaza las agendas oficiales para comprobar fechas y horarios cuando se publiquen. Santa Eulàlia es una candidata de mediados de febrero, pero hay que confirmar su programación de 2027.</p>
+          </details>
+          <details>
+            <summary>¿Cómo se considera la comodidad de una persona mayor?</summary>
+            <p>Esta versión prioriza paseos tranquilos como filtro inicial. Una planificación fiable necesitará datos de accesibilidad por estación, transporte, alojamiento y atracción, además de descansos reales.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap footer-row">
+      <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true">↗</span> rumbo lento</a>
+      <p>Planificación orientativa · precios de demostración, no aptos para reservar.</p>
+      <p>Hecho para viajar mejor, paso a paso.</p>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const localDestinations = [
+        {
+          id: "barcelona", name: "Barcelona", category: "Ciudad & compras", coords: [41.3874, 2.1686],
+          image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=900&q=80",
+          summary: "Paseo urbano, mercados y tiendas. Se puede organizar por zonas para caminar menos.",
+          hours: "1–3 días", transport: "Tren", effort: 1, tags: ["shopping", "culture", "easy"],
+          transportCost: 14, visitCost: 0, note: "Estimación de muestra · ida y vuelta"
+        },
+        {
+          id: "girona", name: "Girona", category: "Historia & paseo", coords: [41.9794, 2.8214],
+          image: "https://images.unsplash.com/photo-1590077428593-a55bb07c4665?auto=format&fit=crop&w=900&q=80",
+          summary: "Casco antiguo, cafés y comercios. Hay adoquines y algunas calles con pendiente.",
+          hours: "1 día", transport: "Tren", effort: 2, tags: ["culture", "shopping"],
+          transportCost: 18, visitCost: 4, note: "Estimación de muestra · ida y vuelta"
+        },
+        {
+          id: "vic", name: "Vic", category: "Mercado & centro", coords: [41.9303, 2.2545],
+          image: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=900&q=80",
+          summary: "Una salida de escala pequeña, con plaza central, tiendas y mercado en días señalados.",
+          hours: "1 día", transport: "Tren", effort: 1, tags: ["shopping", "culture", "easy"],
+          transportCost: 15, visitCost: 0, note: "Estimación de muestra · ida y vuelta"
+        },
+        {
+          id: "montserrat", name: "Montserrat", category: "Paisaje & cultura", coords: [41.5933, 1.8372],
+          image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=900&q=80",
+          summary: "Paisaje singular y visita cultural. Confirmar conexiones y accesos antes de ir.",
+          hours: "1 día", transport: "Tren + conexión", effort: 2, tags: ["nature", "culture"],
+          transportCost: 34, visitCost: 10, note: "Estimación de muestra · conexiones incluidas"
+        },
+        {
+          id: "figueres", name: "Figueres", category: "Arte & cultura", coords: [42.2665, 2.9616],
+          image: "https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=900&q=80",
+          summary: "Museo Dalí y paseo por el centro. El coste de entrada puede cambiar según tarifa.",
+          hours: "1 día", transport: "Tren", effort: 1, tags: ["culture", "easy"],
+          transportCost: 30, visitCost: 18, note: "Estimación de muestra · entrada orientativa"
+        },
+        {
+          id: "perpignan", name: "Perpiñán", category: "Francia cercana", coords: [42.6887, 2.8948],
+          image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80",
+          summary: "Un cambio de país para pasear y mirar tiendas; revisar bien el tiempo de conexión.",
+          hours: "1–2 días", transport: "Tren / bus", effort: 1, tags: ["shopping", "culture", "easy"],
+          transportCost: 48, visitCost: 0, note: "Estimación de muestra · tarifa variable"
+        },
+        {
+          id: "andorra", name: "Andorra", category: "Compras & montaña", coords: [42.5063, 1.5218],
+          image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=80",
+          summary: "Tiendas y montaña. El trayecto por carretera es largo; comparar el ahorro total.",
+          hours: "1–2 días", transport: "Bus", effort: 2, tags: ["shopping", "nature"],
+          transportCost: 58, visitCost: 0, note: "Estimación de muestra · bus ida y vuelta"
+        },
+        {
+          id: "madrid", name: "Madrid", category: "Ciudad & compras", coords: [40.4168, -3.7038],
+          image: "https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=900&q=80",
+          summary: "Mejor con dos noches para amortizar el viaje y conocer la ciudad a un ritmo cómodo.",
+          hours: "2–3 días", transport: "Tren", effort: 2, tags: ["shopping", "culture"],
+          transportCost: 110, visitCost: 0, note: "Estimación de muestra · tren, tarifa muy variable"
+        }
+      ];
+
+      const API_URL = "https://lsanhueza.oph.st/webhook/rumbo-lento/v1";
+      let destinations = localDestinations;
+      let latestApiRequest = 0;
+      let map;
+      let markers = {};
+      let toastTimer;
+      const money = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+
+      const $ = (id) => document.getElementById(id);
+      const activeTravelerCount = () => Number($("travelerCount").value);
+      const estimatedCost = (destination) => destination.transportCost === null ? null : destination.transportCost + destination.visitCost;
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+        })[character]);
+      }
+
+      function matchesFilters(destination) {
+        const cost = estimatedCost(destination);
+        const budget = Number($("maxBudget").value);
+        if (cost !== null && cost > budget) return false;
+        if (cost === null) return false;
+        const interest = $("interestSelect").value;
+        if (interest !== "all" && !destination.tags.includes(interest)) return false;
+        if ($("easyOnly").checked && destination.effort > 1) return false;
+        const transport = $("transportSelect").value;
+        if (transport === "train" && !destination.transport.toLowerCase().includes("tren")) return false;
+        if (transport === "bus" && !destination.transport.toLowerCase().includes("bus")) return false;
+        return true;
+      }
+
+      function renderDestinations() {
+        const filtered = destinations.filter(matchesFilters);
+        const count = activeTravelerCount();
+        $("resultsTitle").textContent = "Escapadas cerca y un poco más allá";
+        $("resultsCount").textContent = filtered.length + (filtered.length === 1 ? " destino" : " destinos") + " · " + count + (count === 1 ? " viajero" : " viajeros");
+        const grid = $("destinationGrid");
+        if (!filtered.length) {
+          grid.innerHTML = '<div class="empty-state">No encontramos destinos con estos filtros. Prueba ampliar el presupuesto o cambiar el interés.</div>';
+          return;
+        }
+        grid.innerHTML = filtered.map((destination) => {
+          const cost = estimatedCost(destination);
+          const groupCost = cost === null ? "Por cotizar" : money.format(cost * count);
+          return `<article class="destination-card">
+            <div class="card-image" style="background-image:url('${destination.image}')">
+              <span class="card-label">${destination.category}</span><div class="card-title">${destination.name}</div>
+            </div>
+            <div class="card-body">
+              <div class="card-meta"><span>◷ ${destination.hours}</span><span>↗ ${destination.transport}</span><span>${destination.effort === 1 ? "Paseo tranquilo" : "Ritmo moderado"}</span></div>
+              <p>${destination.summary}</p>
+              <div class="card-cost">
+                <div><small>Por persona · transporte + visita</small><strong>${cost === null ? "Por cotizar" : money.format(cost)}</strong></div>
+                <div class="group-cost"><small>Grupo (${count})</small><strong>${groupCost}</strong></div>
+              </div>
+              <div class="card-meta" style="margin-top:7px">${destination.note}</div>
+              <div class="card-actions">
+                <button class="button small-outline" type="button" data-map="${destination.id}">Ver en mapa</button>
+                <button class="button" type="button" data-add="${destination.id}">Sumar al plan ＋</button>
+              </div>
+            </div>
+          </article>`;
+        }).join("");
+        grid.querySelectorAll("[data-map]").forEach((button) => button.addEventListener("click", () => focusDestination(button.dataset.map)));
+        grid.querySelectorAll("[data-add]").forEach((button) => button.addEventListener("click", () => {
+          const destination = destinations.find((item) => item.id === button.dataset.add);
+          showToast(destination.name + " añadido a tu idea de viaje.");
+        }));
+      }
+
+      async function loadApiDestinations() {
+        const requestId = ++latestApiRequest;
+        const params = new URLSearchParams({
+          travelers: String(activeTravelerCount()),
+          budget: String(Number($("maxBudget").value)),
+          interest: $("interestSelect").value
+        });
+        $("apiStatus").textContent = "Actualizando catálogo…";
+
+        try {
+          const response = await fetch(API_URL + "?" + params.toString());
+          if (!response.ok) throw new Error("HTTP " + response.status);
+          const data = await response.json();
+          if (!data || !Array.isArray(data.destinations) || !data.destinations.every((item) =>
+            item && typeof item.id === "string" && Number.isFinite(item.costPerPerson) &&
+            localDestinations.some((destination) => destination.id === item.id)
+          )) throw new Error("Respuesta de catálogo no válida");
+          if (requestId !== latestApiRequest) return;
+
+          destinations = data.destinations.map((item) => {
+            const local = localDestinations.find((destination) => destination.id === item.id);
+            if (!local) return null;
+            return {
+              ...local,
+              category: item.category || local.category,
+              coords: Array.isArray(item.coordinates) ? item.coordinates : local.coords,
+              transport: item.transport || local.transport,
+              hours: item.hours || local.hours,
+              effort: Number.isFinite(item.effort) ? item.effort : local.effort,
+              tags: Array.isArray(item.tags) ? item.tags : local.tags,
+              transportCost: Number.isFinite(item.costPerPerson) ? item.costPerPerson : null,
+              visitCost: 0,
+              note: item.priceStatus === "demo" ? "Coste de muestra · confirmar antes de reservar" : "Estimación del catálogo"
+            };
+          }).filter(Boolean);
+          $("apiStatus").textContent = "API conectada · costes de muestra";
+          renderDestinations();
+        } catch (error) {
+          if (requestId !== latestApiRequest) return;
+          destinations = localDestinations;
+          $("apiStatus").textContent = "Modo local · API no disponible";
+          console.warn("No se pudo actualizar el catálogo de Rumbo Lento; se muestran los datos locales.", error);
+          renderDestinations();
+        }
+      }
+
+      function showToast(message) {
+        const toast = $("toast");
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2600);
+      }
+
+      function focusDestination(id) {
+        if (!map || !markers[id]) {
+          $("mapa").scrollIntoView({ behavior: "smooth" });
+          return;
+        }
+        $("mapa").scrollIntoView({ behavior: "smooth" });
+        window.setTimeout(() => {
+          map.invalidateSize();
+          map.setView(markers[id].getLatLng(), 9);
+          markers[id].openPopup();
+        }, 350);
+      }
+
+      function setupMap() {
+        const fallback = $("mapFallback");
+        if (!window.L) {
+          $("map").style.display = "none";
+          fallback.style.display = "grid";
+          return;
+        }
+        map = L.map("map", { scrollWheelZoom: false }).setView([41.3, 2.8], 7);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 18
+        }).addTo(map);
+        L.circleMarker([41.689, 2.489], {
+          radius: 9, color: "#fff", weight: 3, fillColor: "#21483f", fillOpacity: 1
+        }).addTo(map).bindPopup('<div class="popup-title">Sant Celoni</div><div class="popup-copy">Punto de partida</div>');
+        destinations.forEach((destination) => {
+          const marker = L.circleMarker(destination.coords, {
+            radius: 7, color: "#fff", weight: 2, fillColor: "#638273", fillOpacity: .95
+          }).addTo(map);
+          marker.bindPopup(`<div class="popup-title">${escapeHtml(destination.name)}</div><div class="popup-copy">${escapeHtml(destination.summary)}</div>`);
+          markers[destination.id] = marker;
+        });
+      }
+
+      $("travelerCount").addEventListener("change", (event) => {
+        const value = Number(event.target.value);
+        event.target.value = String(Number.isInteger(value) ? Math.min(9, Math.max(1, value)) : 1);
+        renderDestinations();
+        loadApiDestinations();
+      });
+      $("maxBudget").addEventListener("input", () => {
+        $("budgetValue").textContent = money.format(Number($("maxBudget").value));
+        renderDestinations();
+      });
+      $("maxBudget").addEventListener("change", loadApiDestinations);
+      $("interestSelect").addEventListener("change", loadApiDestinations);
+      ["transportSelect", "easyOnly"].forEach((id) => $(id).addEventListener("change", renderDestinations));
+      $("resetFilters").addEventListener("click", () => {
+        $("travelerCount").value = 4;
+        $("maxBudget").value = 100;
+        $("budgetValue").textContent = "€100";
+        $("interestSelect").value = "all";
+        $("transportSelect").value = "all";
+        $("easyOnly").checked = false;
+        renderDestinations();
+        loadApiDestinations();
+      });
+      $("menuButton").addEventListener("click", () => {
+        const links = $("navLinks");
+        const open = links.classList.toggle("open");
+        $("menuButton").setAttribute("aria-expanded", String(open));
+      });
+      $("navLinks").querySelectorAll("a").forEach((link) => link.addEventListener("click", () => {
+        $("navLinks").classList.remove("open");
+        $("menuButton").setAttribute("aria-expanded", "false");
+      }));
+
+      renderDestinations();
+      setupMap();
+      loadApiDestinations();
+    })();
+  </script>
+</body>
+</html>
