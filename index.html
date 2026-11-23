@@ -48,6 +48,7 @@
     .section-intro { color: var(--muted); line-height: 1.7; max-width: 600px; margin-bottom: 0; }
 
     .topbar { position: absolute; z-index: 20; inset: 0 0 auto; color: white; }
+    body.detail-mode .topbar { background: var(--green-dark); }
     .nav { min-height: 82px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
     .brand { display: inline-flex; align-items: center; gap: 10px; font: 800 17px Manrope, sans-serif; letter-spacing: -.04em; }
     .brand-mark {
@@ -73,9 +74,10 @@
     .button {
       display: inline-flex; justify-content: center; align-items: center; gap: 10px; min-height: 46px; padding: 0 19px;
       border: 0; border-radius: 30px; background: var(--green); color: white; font-weight: 700; font-size: 12px;
-      transition: transform .18s ease, background .18s ease;
+      cursor: pointer; transition: transform .18s ease, background .18s ease;
     }
     .button:hover { transform: translateY(-2px); background: var(--green-dark); }
+    .button:disabled { opacity: .62; cursor: not-allowed; transform: none; }
     .button.light { background: white; color: var(--ink); }
     .button.outline { background: transparent; border: 1px solid #ffffffa8; }
     .hero-note { display: flex; align-items: center; gap: 9px; font-size: 11px; color: #ffffffd9; margin-top: 27px; }
@@ -124,8 +126,11 @@
     .destination-card { min-width: 0; background: white; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 7px 21px #29453b08; }
     .card-image { height: 164px; position: relative; background: #a7b6a8 center / cover; }
     .card-image::after { content: ""; position: absolute; inset: 45% 0 0; background: linear-gradient(transparent, #12251dcc); }
+    .card-photo-credit { position: absolute; z-index: 2; right: 8px; bottom: 45px; max-width: calc(100% - 16px); }
     .card-label { position: absolute; z-index: 1; top: 12px; left: 12px; background: #fff; padding: 6px 9px; border-radius: 20px; font-size: 9px; font-weight: 700; }
     .card-title { position: absolute; z-index: 1; left: 15px; right: 12px; bottom: 13px; color: white; font: 700 21px Manrope, sans-serif; }
+    .card-title-button { width: calc(100% - 27px); padding: 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
+    .card-title-button:focus-visible { outline: 2px solid white; outline-offset: 4px; }
     .card-body { padding: 15px; }
     .card-meta { display: flex; flex-wrap: wrap; gap: 8px 12px; color: var(--muted); font-size: 10px; }
     .card-body p { min-height: 38px; margin: 10px 0 13px; color: #53625c; font-size: 11px; line-height: 1.55; }
@@ -137,6 +142,96 @@
     .card-actions button { min-height: 35px; flex: 1; padding: 0 9px; font-size: 10px; }
     .button.small-outline { background: transparent; color: var(--green); border: 1px solid #d5e0d9; }
     .empty-state { background: white; border-radius: 14px; padding: 35px 20px; text-align: center; color: var(--muted); font-size: 12px; grid-column: 1 / -1; }
+
+    main > section[hidden], .destination-page[hidden] { display: none !important; }
+    .destination-page { min-height: 75vh; padding: 112px 0 76px; background: var(--cream); }
+    .detail-shell { width: min(1050px, calc(100% - 48px)); margin-inline: auto; }
+    .detail-top { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .detail-hero { position: relative; display: flex; align-items: end; min-height: 290px; overflow: hidden; border-radius: 20px; color: white; background: #36544a center / cover; }
+    .detail-hero::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #102720d9, #10272030 90%); }
+    .detail-hero .hero-photo-credit { z-index: 2; }
+    .detail-hero-content { position: relative; z-index: 1; max-width: 700px; padding: clamp(24px, 5vw, 48px); }
+    .detail-hero h1 { margin: 12px 0 8px; font-size: clamp(34px, 6vw, 58px); line-height: 1; }
+    .detail-hero p { max-width: 560px; margin: 0; color: #f0f3ef; font-size: 13px; line-height: 1.65; }
+    .detail-meta { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 17px; }
+    .detail-meta span { padding: 7px 10px; border: 1px solid #ffffff50; border-radius: 20px; background: #ffffff19; font-size: 10px; }
+    .detail-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; margin-top: 16px; }
+    .detail-panel { padding: 22px; border: 1px solid var(--line); border-radius: 16px; background: white; }
+    .detail-panel h2, .detail-activities h2 { margin: 0 0 12px; font-size: 20px; }
+    .detail-panel ul { margin: 0; padding-left: 18px; color: #53625c; font-size: 12px; line-height: 1.8; }
+    .detail-panel p { margin: 0; color: #53625c; font-size: 12px; line-height: 1.7; }
+    .detail-access { margin-top: 12px !important; padding-top: 12px; border-top: 1px solid var(--line); }
+    .detail-date-row { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 14px; margin: 22px 0 12px; }
+    .detail-date-row p { max-width: 520px; margin: 0; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .detail-date-control { display: grid; gap: 6px; min-width: 190px; color: var(--muted); font-size: 10px; font-weight: 700; }
+    .detail-date-control input { min-height: 40px; padding: 0 10px; border: 1px solid var(--line); border-radius: 9px; background: white; color: var(--ink); font: inherit; }
+    .detail-activities { margin-top: 26px; }
+    .detail-activities > p { margin: -4px 0 16px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .experience-heading { display: flex; align-items: end; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .experience-guide-link, .experience-source { color: var(--green); font-size: 10px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+    .ticket-options { margin: 18px 0 8px; padding: 20px; border: 1px solid #dce5dc; border-radius: 16px; background: #f1f5ef; }
+    .ticket-options-head { display: flex; justify-content: space-between; align-items: start; gap: 16px; margin-bottom: 14px; }
+    .ticket-options h2 { margin: 0 0 5px; font-size: 19px; }
+    .ticket-options-head p, .ticket-options-note { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .ticket-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+    .ticket-option { padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: white; }
+    .ticket-option h3 { margin: 0 0 5px; font-size: 14px; }
+    .ticket-option-price { display: block; margin: 8px 0; color: var(--green); font: 800 20px Manrope, sans-serif; }
+    .ticket-option p { margin: 0 0 10px; color: #53625c; font-size: 10px; line-height: 1.6; }
+    .ticket-option a { color: var(--green); font-size: 10px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+    .ticket-option .button { width: 100%; margin-top: 12px; }
+    .ticket-options-note { margin-top: 12px; }
+    .activity-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+    .activity-card { display: flex; flex-direction: column; min-height: 390px; padding: 18px; border: 1px solid var(--line); border-radius: 15px; background: white; box-shadow: 0 5px 16px #29453b08; }
+    .activity-photo { position: relative; height: 168px; margin: -18px -18px 14px; overflow: hidden; border-radius: 14px 14px 0 0; background: #d8ded7; }
+    .activity-photo img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .photo-credit { position: absolute; right: 7px; bottom: 7px; max-width: calc(100% - 14px); padding: 4px 7px; border-radius: 8px; color: white; background: #142d27d9; font-size: 8px; line-height: 1.4; }
+    .photo-credit a { color: white; text-decoration: underline; text-underline-offset: 2px; }
+    .activity-type { color: #92643d; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .activity-card h3 { margin: 8px 0 6px; font-size: 15px; }
+    .activity-card p { margin: 0 0 12px; color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .activity-price { margin-top: auto; padding: 10px 0; border-top: 1px solid #edf0eb; }
+    .activity-price small { display: block; color: var(--muted); font-size: 9px; }
+    .activity-price strong { display: block; margin-top: 3px; color: var(--ink); font: 700 12px Manrope, sans-serif; line-height: 1.45; }
+    .activity-card .experience-source { align-self: flex-start; margin: 0 0 8px; }
+    .activity-card .button { width: 100%; min-height: 38px; margin-top: 5px; }
+    .detail-note { margin: 17px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .rail-context { margin-top: 15px; padding: 14px 16px; border-left: 3px solid #ca9862; border-radius: 0 12px 12px 0; background: #f5eee3; color: #544634; font-size: 11px; line-height: 1.65; }
+    .rail-context a { font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+    .day-plan { margin-top: 27px; }
+    .day-plan-intro { color: var(--muted); font-size: 11px; line-height: 1.6; }
+    .daypart-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .daypart-card { overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: white; }
+    .daypart-card figure { position: relative; height: 160px; margin: 0; background: #d8ded7; }
+    .daypart-card figure img { width: 100%; height: 100%; object-fit: cover; }
+    .daypart-card-body { padding: 16px; }
+    .daypart-time { color: #92643d; font-size: 9px; font-weight: 800; letter-spacing: .12em; }
+    .daypart-card h3 { margin: 6px 0; font-size: 15px; }
+    .daypart-card p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.65; }
+    .daypart-card .rest-tip { margin-top: 9px; padding-top: 9px; border-top: 1px solid var(--line); }
+    .destination-shopping { margin-top: 20px; padding: 19px; border: 1px solid #dce5dc; border-radius: 15px; background: #f1f5ef; }
+    .destination-shopping h2 { margin: 0 0 7px; font-size: 18px; }
+    .destination-shopping p { margin: 0 0 8px; color: #53625c; font-size: 11px; line-height: 1.65; }
+    .destination-shopping a { color: var(--green); font-size: 10px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+
+    .my-plan { padding: 72px 0; background: #eeefe9; }
+    .plan-layout { display: grid; grid-template-columns: minmax(230px, .7fr) minmax(0, 1.3fr); gap: 16px; align-items: start; }
+    .plan-summary, .plan-list { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: white; }
+    .plan-summary h3 { margin-bottom: 10px; font-size: 16px; }
+    .plan-total { padding: 12px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; line-height: 1.7; }
+    .plan-total strong { display: block; color: var(--ink); }
+    .plan-total-main { font: 700 20px Manrope, sans-serif; }
+    .plan-status { min-height: 18px; margin: 8px 0 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .plan-list { display: grid; gap: 10px; }
+    .plan-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 13px; border: 1px solid var(--line); border-radius: 12px; }
+    .plan-item h3 { margin: 4px 0; font-size: 13px; }
+    .plan-item p { margin: 0; color: var(--muted); font-size: 10px; line-height: 1.5; }
+    .plan-item-side { display: grid; justify-items: end; align-content: space-between; gap: 8px; }
+    .plan-item input[type="date"] { max-width: 150px; min-height: 34px; padding: 0 7px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); font: inherit; font-size: 10px; }
+    .plan-remove, .plan-clear { border: 0; background: transparent; color: #8a5043; font-size: 10px; text-decoration: underline; cursor: pointer; }
+    .plan-clear { margin-top: 13px; padding: 0; }
+    .plan-clear:disabled { color: #9aa39d; cursor: default; }
+    .plan-count { display: inline-grid; place-items: center; min-width: 17px; height: 17px; margin-left: 3px; padding: 0 4px; border-radius: 10px; background: #e5eee7; color: var(--green); font-size: 9px; font-weight: 700; }
 
     .map-section { padding: 92px 0; }
     .map-section .section-heading { margin-bottom: 25px; }
@@ -150,20 +245,22 @@
     .leaflet-popup-content-wrapper { border-radius: 12px; }
     .popup-title { font: 700 13px Manrope, sans-serif; margin-bottom: 4px; }
     .popup-copy { font: 11px "DM Sans", sans-serif; color: #586760; }
+    .popup-link { display: inline-block; margin-top: 8px; color: var(--green); font: 700 11px "DM Sans", sans-serif; }
 
     .itinerary { padding: 82px 0 90px; background: var(--green-dark); color: white; }
     .itinerary .eyebrow { color: #d7b995; }
     .itinerary .section-intro { color: #d0dad4; }
     .itinerary .section-heading { margin-bottom: 32px; }
-    .itinerary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .itinerary-card { background: #ffffff0d; border: 1px solid #ffffff24; border-radius: 17px; padding: 23px; }
-    .itinerary-card h3 { font-size: 18px; margin-bottom: 8px; }
-    .itinerary-card > p { font-size: 11px; color: #c6d3cc; line-height: 1.65; }
-    .timeline { list-style: none; margin: 20px 0 0; padding: 0; }
-    .timeline li { display: grid; grid-template-columns: 56px 1fr; gap: 12px; padding: 13px 0; border-top: 1px solid #ffffff21; }
-    .timeline time { color: #e3c9a9; font-size: 10px; font-weight: 700; padding-top: 2px; }
-    .timeline strong { display: block; font-size: 11px; margin-bottom: 3px; }
-    .timeline span { display: block; color: #c6d3cc; font-size: 10px; line-height: 1.5; }
+    .rail-stay-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .rail-stay-card { overflow: hidden; border: 1px solid #ffffff24; border-radius: 16px; background: #ffffff0d; }
+    .rail-stay-photo, .shopping-photo { position: relative; }
+    .rail-stay-card img { display: block; width: 100%; height: 142px; object-fit: cover; }
+    .rail-stay-card-body { padding: 16px; }
+    .rail-stay-card h3 { margin: 7px 0; font-size: 16px; }
+    .rail-stay-card p { margin: 0 0 12px; color: #c6d3cc; font-size: 10px; line-height: 1.6; }
+    .rail-stay-card .eyebrow { color: #e3c9a9; font-size: 9px; }
+    .rail-stay-card a { color: #fff; font-size: 10px; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+    .rail-stay-card .rail-ticket-link { display: inline-block; margin-left: 10px; }
     .itinerary-note { display: flex; justify-content: space-between; gap: 20px; align-items: center; padding: 17px 19px; margin-top: 20px; background: #ffffff10; border-radius: 12px; }
     .itinerary-note p { color: #d4dfd8; font-size: 10px; line-height: 1.6; margin: 0; max-width: 720px; }
     .itinerary-note strong { color: white; }
@@ -191,17 +288,18 @@
     .tip-source:hover { text-decoration: underline; }
     .tips-note { margin: 17px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
 
-    .black-friday { padding: 88px 0; }
-    .bf-card { display: grid; grid-template-columns: 1fr 1fr; overflow: hidden; border-radius: 20px; background: #e9e9df; }
-    .bf-copy { padding: clamp(28px, 5vw, 58px); }
-    .bf-copy h2 { font-size: clamp(28px, 4vw, 43px); margin: 16px 0 13px; }
-    .bf-copy p { color: var(--muted); font-size: 12px; line-height: 1.7; max-width: 440px; }
-    .bf-points { display: grid; gap: 10px; padding: 0; list-style: none; margin: 20px 0 24px; color: #45554d; font-size: 11px; }
-    .bf-points li::before { content: "✓"; display: inline-grid; place-items: center; width: 17px; height: 17px; background: #d7e2d7; color: var(--green); border-radius: 50%; margin-right: 8px; font-weight: 700; }
-    .bf-visual { position: relative; min-height: 350px; background: #8b9b8e url("https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1000&q=80") center / cover; }
-    .bf-visual::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, #203b3328, #142d2766); }
-    .bf-note { position: absolute; z-index: 1; right: 22px; bottom: 22px; max-width: 215px; padding: 15px; border-radius: 12px; color: white; background: #173d35e8; font-size: 10px; line-height: 1.6; }
-    .bf-note strong { display: block; font: 700 14px Manrope, sans-serif; margin-bottom: 5px; }
+    .shopping { padding: 82px 0; background: #eeefe9; }
+    .shopping-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    .shopping-card { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: white; }
+    .shopping-card img { display: block; width: 100%; height: 156px; object-fit: cover; }
+    .shopping-card-body { padding: 17px; }
+    .shopping-card h3 { margin: 7px 0; font-size: 16px; }
+    .shopping-card p { margin: 0 0 9px; color: var(--muted); font-size: 11px; line-height: 1.65; }
+    .shopping-card small { display: block; margin-top: 10px; color: var(--green); font-size: 10px; line-height: 1.5; }
+    .shopping-card a { color: var(--green); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+    .shopping-card .shopping-source { display: inline-block; margin-top: 10px; font-size: 10px; }
+    .shopping-note { margin: 17px 0 0; color: var(--muted); font-size: 10px; line-height: 1.6; }
+    .unknown-cost-note { margin-top: 8px; color: #765a37; font-size: 9px; line-height: 1.4; }
 
     .faq { padding: 72px 0 88px; background: #efefe9; }
     .faq-grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 55px; }
@@ -226,6 +324,7 @@
       .destination-grid { gap: 10px; }
       .card-image { height: 140px; }
       .nav-links { gap: 16px; }
+      .rail-stay-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
     @media (max-width: 700px) {
       .wrap { width: min(100% - 32px, 560px); }
@@ -252,15 +351,23 @@
       .map-section { padding: 65px 0; }
       .map-shell { height: 360px; }
       .itinerary { padding: 65px 0; }
-      .itinerary-grid, .event-grid, .tip-grid, .bf-card, .faq-grid { grid-template-columns: 1fr; }
+      .rail-stay-grid, .shopping-grid, .daypart-grid, .event-grid, .tip-grid, .faq-grid { grid-template-columns: 1fr; }
       .itinerary-note { align-items: start; flex-direction: column; }
       .events { padding: 65px 0; }
       .tips { padding: 65px 0; }
-      .bf-visual { min-height: 250px; grid-row: 1; }
-      .black-friday { padding: 65px 0; }
+      .shopping { padding: 65px 0; }
       .faq { padding: 60px 0; }
       .faq-grid { gap: 25px; }
       .footer-row { align-items: start; flex-direction: column; }
+      .detail-shell { width: min(calc(100% - 32px), 700px); }
+      .detail-hero { min-height: 260px; }
+      .detail-columns, .plan-layout { grid-template-columns: 1fr; }
+      .detail-top { align-items: stretch; flex-direction: column; }
+      .detail-top .button { width: 100%; }
+      .rail-stay-card img, .shopping-card img { height: 190px; }
+      .daypart-card figure { height: 190px; }
+      .plan-item { grid-template-columns: 1fr; }
+      .plan-item-side { justify-items: start; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
@@ -274,18 +381,20 @@
       <div class="nav-links" id="navLinks">
         <a href="#inicio">Inicio</a>
         <a href="#explorar">Destinos</a>
+        <a href="#mi-paseo">Mi paseo <span class="plan-count" id="planCount">0</span></a>
         <a href="#mapa">Mapa</a>
         <a href="#rutas">Rutas</a>
         <a href="#eventos">Eventos</a>
         <a href="#tips">Consejos</a>
-        <a href="#ofertas">Ofertas</a>
-        <a class="nav-cta" href="#explorar">Armar mi viaje&nbsp; ↗</a>
+        <a href="#compras">Compras locales</a>
+        <a class="nav-cta" href="#mi-paseo">Armar mi viaje&nbsp; ↗</a>
       </div>
       <button class="menu-button" id="menuButton" aria-label="Abrir menú" aria-expanded="false">☰</button>
     </nav>
   </header>
 
   <main>
+    <section class="destination-page" id="destinationPage" hidden></section>
     <section class="hero" id="inicio">
       <div class="wrap hero-content">
         <span class="eyebrow">Viajes a tu ritmo · desde Sant Celoni</span>
@@ -359,6 +468,23 @@
       </div>
     </section>
 
+    <section class="my-plan" id="mi-paseo">
+      <div class="wrap">
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Tu itinerario</span>
+            <h2>Mi paseo</h2>
+            <p class="section-intro">Añade actividades desde la ficha de cada destino. Se guardarán en este dispositivo y podrás cambiar el día o quitarlas.</p>
+          </div>
+        </div>
+        <div class="plan-layout">
+          <aside class="plan-summary" id="planSummary"></aside>
+          <div class="plan-list" id="planList" aria-live="polite"></div>
+        </div>
+        <p class="plan-status" id="planStatus" role="status">El itinerario se guarda solo en este dispositivo.</p>
+      </div>
+    </section>
+
     <section class="map-section wrap" id="mapa">
       <div class="section-heading">
         <div>
@@ -381,34 +507,15 @@
       <div class="wrap">
         <div class="section-heading">
           <div>
-            <span class="eyebrow">Inspiración para empezar</span>
-            <h2>Dos maneras de viajar sin correr</h2>
-            <p class="section-intro">Ideas de ejemplo: antes de salir, confirma horarios, accesos, cierres de invierno y tarifas.</p>
+            <span class="eyebrow">Francia en tren</span>
+            <h2>Elige por tiempo de viaje, no solo por la foto</h2>
+            <p class="section-intro">Los tiempos son desde Barcelona Sants según la búsqueda consultada el 23/11/2026. Añade el tren desde Sant Celoni, transbordos y margen entre billetes.</p>
           </div>
         </div>
-        <div class="itinerary-grid">
-          <article class="itinerary-card">
-            <h3>Girona en un día</h3>
-            <p>Una salida sencilla desde Sant Celoni, con tiempo para pasear, comer y volver sin sumar una noche de hotel.</p>
-            <ul class="timeline">
-              <li><time>MAÑANA</time><div><strong>Tren a Girona</strong><span>Revisar el horario directo o las conexiones disponibles para ese día.</span></div></li>
-              <li><time>MEDIODÍA</time><div><strong>Casco antiguo y pausa larga</strong><span>Elegir un recorrido corto; algunas calles tienen adoquines y desniveles.</span></div></li>
-              <li><time>TARDE</time><div><strong>Tiendas y regreso</strong><span>Tiempo libre por el centro y vuelta en tren según el horario elegido.</span></div></li>
-            </ul>
-          </article>
-          <article class="itinerary-card">
-            <h3>Barcelona con calma</h3>
-            <p>Una ciudad para combinar compras, paseo y descanso. Mejor elegir una zona por día en vez de intentar verlo todo.</p>
-            <ul class="timeline">
-              <li><time>DÍA 1</time><div><strong>Llegada y paseo corto</strong><span>Dejar las maletas, comer cerca y conocer el barrio del alojamiento.</span></div></li>
-              <li><time>DÍA 2</time><div><strong>Centro y compras</strong><span>Plan con paradas en cafeterías, baños accesibles y transporte urbano.</span></div></li>
-              <li><time>DÍA 3</time><div><strong>Una visita cercana</strong><span>Escoger solo una salida y volver con margen para descansar.</span></div></li>
-            </ul>
-          </article>
-        </div>
+        <div class="rail-stay-grid" id="railStayGrid"></div>
         <div class="itinerary-note">
-          <p><strong>6–8 de febrero · fechas bloqueadas:</strong> visita familiar en Malta. No se incluirán salidas ni actividades en la planificación de esos días.</p>
-          <a class="button light" href="#eventos">Ver eventos y actividades ↗</a>
+          <p><strong>Recomendación de agente:</strong> Perpiñán es el salto internacional más corto; para Collioure, Montpellier, Carcasona o Lyon, duerme al menos una noche y no bases el regreso en el último tren.</p>
+          <a class="button light" href="#explorar">Ver destinos y fichas ↗</a>
         </div>
       </div>
     </section>
@@ -487,24 +594,17 @@
       </div>
     </section>
 
-    <section class="black-friday" id="ofertas">
+    <section class="shopping" id="compras">
       <div class="wrap">
-        <div class="bf-card">
-          <div class="bf-copy">
-            <span class="eyebrow">Precios claros, sin falsas promesas</span>
-            <h2>Que una oferta sea una oferta de verdad</h2>
-            <p>La API ya organiza el catálogo y aplica los filtros, pero aún no consulta tarifas de operadores. Cuando integremos fuentes verificables, podremos guardar precios observados y compararlos con posibles ofertas de Black Friday.</p>
-            <ul class="bf-points">
-              <li>Fecha de consulta y enlace a la tarifa</li>
-              <li>Precio por persona y total para el grupo de ese tramo</li>
-              <li>Alojamiento, transporte y entradas por separado</li>
-            </ul>
-            <a class="button" href="#explorar">Probar el planificador <span aria-hidden="true">↗</span></a>
-          </div>
-          <div class="bf-visual" role="img" aria-label="Escaparates de una calle comercial">
-            <div class="bf-note"><strong>Black Friday · seguimiento futuro</strong>Las ofertas no están activas todavía. El sistema no marcará un descuento hasta tener un precio verificable.</div>
+        <div class="section-heading">
+          <div>
+            <span class="eyebrow">Compras con identidad local</span>
+            <h2>Qué merece la pena llevar de cada ciudad</h2>
+            <p class="section-intro">Ideas para buscar artesanía y productos de la zona, no una lista de tiendas pagadas. Compara precios y comprueba horarios de invierno antes de desviarte.</p>
           </div>
         </div>
+        <div class="shopping-grid" id="shoppingGrid"></div>
+        <p class="shopping-note">La disponibilidad cambia por temporada y día de mercado. Los productos gastronómicos son sugerencias; comprueba ingredientes, conservación y normas de transporte antes de comprar.</p>
       </div>
     </section>
 
@@ -518,7 +618,7 @@
         <div class="faq-list">
           <details open>
             <summary>¿Los precios de esta versión son actuales?</summary>
-            <p>No. Son importes de demostración para enseñar cómo se calcula el coste por persona y grupo. Antes de reservar, hay que consultar los operadores; cuando integremos tarifas verificables, se indicará su fuente y fecha de actualización.</p>
+            <p>Algunas referencias de tren y entradas se consultaron en las webs oficiales el 23/11/2026 y muestran fecha, origen y condiciones. No son precios garantizados para enero–febrero de 2027. El catálogo conectado a n8n sigue usando costes de muestra; confirma cada trayecto y actividad antes de reservar.</p>
           </details>
           <details>
             <summary>¿Puedo cambiar cuántas personas viajan en cada tramo?</summary>
@@ -593,10 +693,43 @@
         },
         {
           id: "perpignan", name: "Perpiñán", category: "Francia cercana", coords: [42.6887, 2.8948],
-          image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=900&q=80",
-          summary: "Un cambio de país para pasear y mirar tiendas; revisar bien el tiempo de conexión.",
-          hours: "1–2 días", transport: "Tren / bus", effort: 1, tags: ["shopping", "culture", "easy"],
-          transportCost: 48, visitCost: 0, note: "Estimación de muestra · tarifa variable"
+          image: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Perpignan_Castillet_1.jpg/960px-Perpignan_Castillet_1.jpg",
+          photoCredit: { label: "Palauenc05 · CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Perpignan_Castillet_1.jpg" },
+          summary: "La puerta más cercana al sur de Francia: casco antiguo, mercados y paseo urbano.",
+          hours: "1–2 días", transport: "Tren + Rodalies", effort: 1, tags: ["shopping", "culture", "easy"],
+          transportCost: null, visitCost: 0, localOnly: true, note: "SNCF desde 35 € por trayecto Barcelona–Perpiñán (consulta 23/11/2026; no es tarifa 2027)"
+        },
+        {
+          id: "collioure", name: "Collioure", category: "Costa Vermella · Francia", coords: [42.5256, 3.0830],
+          image: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Le_port_de_Collioure_%285722096100%29.jpg/960px-Le_port_de_Collioure_%285722096100%29.jpg",
+          photoCredit: { label: "Jean-Pierre Dalbéra · CC BY 2.0", url: "https://commons.wikimedia.org/wiki/File:Le_port_de_Collioure_(5722096100).jpg" },
+          summary: "Puerto mediterráneo de postal, talleres de artistas y un paseo costero para hacer despacio.",
+          hours: "1 día · mejor con noche", transport: "Tren + TER", effort: 2, tags: ["culture", "nature", "shopping"],
+          transportCost: null, visitCost: 0, localOnly: true, note: "Vía Perpiñán; segunda conexión TER y tarifa por confirmar"
+        },
+        {
+          id: "montpellier", name: "Montpellier", category: "Sur de Francia · ciudad peatonal", coords: [43.6119, 3.8772],
+          image: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Montpellier-_Place_de_la_Com%C3%A9die_-_52262234358.jpg/960px-Montpellier-_Place_de_la_Com%C3%A9die_-_52262234358.jpg",
+          photoCredit: { label: "Jorge Franganillo · CC BY 2.0", url: "https://commons.wikimedia.org/wiki/File:Montpellier-_Place_de_la_Com%C3%A9die_-_52262234358.jpg" },
+          summary: "Plazas soleadas, callejones medievales, tranvía y compras en el Écusson.",
+          hours: "2–3 días", transport: "Tren + Rodalies", effort: 1, tags: ["shopping", "culture", "easy"],
+          transportCost: null, visitCost: 0, localOnly: true, note: "SNCF desde 39 € por trayecto Barcelona–Montpellier (consulta 23/11/2026; no es tarifa 2027)"
+        },
+        {
+          id: "carcassonne", name: "Carcasona", category: "Ciudad medieval · Francia", coords: [43.2067, 2.3633],
+          image: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Ciudadela%2C_Carcasona%2C_Francia%2C_2023-01-07%2C_DD_216-218_HDR.jpg/960px-Ciudadela%2C_Carcasona%2C_Francia%2C_2023-01-07%2C_DD_216-218_HDR.jpg",
+          photoCredit: { label: "Diego Delso · CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Ciudadela,_Carcasona,_Francia,_2023-01-07,_DD_216-218_HDR.jpg" },
+          summary: "Murallas y callejuelas medievales; espectacular, pero con cuestas y piedra irregular.",
+          hours: "2 días", transport: "Tren + conexión", effort: 2, tags: ["culture", "shopping"],
+          transportCost: null, visitCost: 0, localOnly: true, note: "SNCF: desde Barcelona, conexión en aprox. 3 h 13 min; tarifa variable"
+        },
+        {
+          id: "lyon", name: "Lyon", category: "Gran ciudad · Francia", coords: [45.7640, 4.8357],
+          image: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/Lyon_Place_Bellecour_1.jpg/960px-Lyon_Place_Bellecour_1.jpg",
+          photoCredit: { label: "Andrzej Otrębski · CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Lyon_Place_Bellecour_1.jpg" },
+          summary: "Ribera, plazas monumentales y pasajes del Vieux Lyon: gran escapada para varios días.",
+          hours: "3 días", transport: "Tren + Rodalies", effort: 2, tags: ["shopping", "culture"],
+          transportCost: null, visitCost: 0, localOnly: true, note: "SNCF desde 59 € por trayecto Barcelona–Lyon (consulta 23/11/2026; no es tarifa 2027)"
         },
         {
           id: "andorra", name: "Andorra", category: "Compras & montaña", coords: [42.5063, 1.5218],
@@ -614,17 +747,290 @@
         }
       ];
 
+      const destinationDetails = {
+        barcelona: {
+          sourceUrl: "https://www.barcelonaturisme.com/wv3/en/",
+          highlights: ["Barri Gòtic y Born: plazas, calles históricas y escaparates.", "Mercat de Santa Caterina: puestos de comida y arquitectura colorida.", "Parc de la Ciutadella: una pausa al aire libre lejos del ritmo comercial."],
+          food: ["Comparte una tapa o una merienda en un mercado; el consumo se paga aparte.", "Busca menú del día fuera de las calles más concurridas y revisa qué incluye."],
+          access: "Conviene elegir un solo barrio y planear pausas: las distancias del centro se acumulan aunque el terreno sea mayormente llano.",
+          activities: [
+            { id: "born-walk", name: "Paseo por el Born y Santa Caterina", type: "Paseo urbano", duration: "2–3 h", cost: 0, costLabel: "Sin entrada (comida y compras aparte)", description: "Recorrido de calles y plazas; se puede acortar con una pausa en el mercado." },
+            { id: "ciutadella", name: "Pausa en el Parc de la Ciutadella", type: "Descanso al aire libre", duration: "1–2 h", cost: 0, costLabel: "Actividad sin entrada", description: "Añade un tramo tranquilo para sentarse y descansar entre visitas." },
+            { id: "barcelona-market", name: "Merienda en un mercado local", type: "Gastronomía", duration: "45–60 min", cost: null, costLabel: "Consumo según lo que elijan", description: "Prueba algo local sin convertirlo en una comida larga; el gasto depende del puesto." },
+            { id: "picasso-museum", name: "Museu Picasso", type: "Museo", duration: "1.5–2 h", cost: null, costLabel: "Entrada y horario por confirmar", sourceUrl: "https://museupicassobcn.cat/en/", description: "Reserva una franja con anticipación y revisa accesibilidad y tarifa oficial antes de ir." },
+            { id: "park-guell", name: "Parc Güell", type: "Arquitectura y paseo", duration: "1.5–2 h", cost: null, costLabel: "Entrada a zona monumental por confirmar", sourceUrl: "https://parkguell.barcelona/en/", description: "La zona monumental requiere entrada; el recinto tiene pendientes y conviene planear la ruta con pausas." },
+            { id: "passeig-gracia", name: "Paseo de escaparates por Passeig de Gràcia", type: "Compras y arquitectura", duration: "1–2 h", cost: 0, costLabel: "Paseo sin entrada; compras aparte", description: "Un tramo urbano para mirar tiendas y fachadas, con cafeterías y transporte público cerca." }
+          ]
+        },
+        girona: {
+          sourceUrl: "https://www.girona.cat/turisme/eng/",
+          photos: [
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/41/Houses_along_the_Onyar_River%2C_Girona_%281%29_%2831320053085%29.jpg/960px-Houses_along_the_Onyar_River%2C_Girona_%281%29_%2831320053085%29.jpg", alt: "Casas de colores junto al río Onyar en Girona", credit: "Richard Mortel · CC BY 2.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Houses_along_the_Onyar_River,_Girona_(1)_(31320053085).jpg" },
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/97/Cathedral_of_Girona_%282%29.jpg/960px-Cathedral_of_Girona_%282%29.jpg", alt: "Fachada principal de la Catedral de Girona", credit: "Krzysztof Golik · CC BY-SA 4.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Cathedral_of_Girona_(2).jpg" }
+          ],
+          highlights: ["Barri Vell: callejuelas, plazas y casas junto al río Onyar.", "La muralla ofrece vistas; el acceso y los tramos con escaleras deben comprobarse antes.", "El centro reúne cafeterías, tiendas pequeñas y espacios para hacer pausas."],
+          food: ["El xuixo de Girona es una merienda típica; el precio depende del local.", "Compara menús en calles alejadas de los puntos más turísticos."],
+          access: "El casco antiguo tiene adoquines, cuestas y escaleras. Para un ritmo suave, prioriza el centro bajo y evita intentar recorrer toda la muralla.",
+          activities: [
+            { id: "barri-vell", name: "Paseo corto por el Barri Vell", type: "Historia y paseo", duration: "1.5–2 h", cost: 0, costLabel: "Paseo sin entrada", description: "Elige un circuito breve entre el río, las plazas y las calles del centro antiguo." },
+            { id: "girona-museum", name: "Visita a un museo del centro", type: "Cultura", duration: "1–2 h", cost: null, costLabel: "Entrada por confirmar", description: "Escoge un museo según el interés del grupo y revisa accesibilidad, horarios y tarifa oficial." },
+            { id: "xuixo", name: "Pausa para probar un xuixo", type: "Gastronomía", duration: "30–45 min", cost: null, costLabel: "Consumo según el local", description: "Una parada dulce para descansar; consulta el precio en la pastelería." },
+            { id: "girona-walls", name: "Tramo corto de la muralla", type: "Mirador y paseo", duration: "45–90 min", cost: 0, costLabel: "Acceso libre; algunos tramos tienen escaleras", description: "Escoge solo un tramo: hay escalones, desnivel y pavimento irregular. No es la opción más cómoda para todo el mundo." },
+            { id: "girona-cathedral", name: "Catedral de Girona", type: "Patrimonio", duration: "1–1.5 h", cost: null, costLabel: "Entrada por confirmar", sourceUrl: "https://catedraldegirona.cat/", description: "Confirma tarifa, horarios y acceso antes de subir al casco antiguo." },
+            { id: "girona-jewish-museum", name: "Museu d'Història dels Jueus", type: "Museo", duration: "1–1.5 h", cost: null, costLabel: "Entrada por confirmar", sourceUrl: "https://www.girona.cat/call/eng/", description: "Visita cultural bajo techo en el centro histórico; comprueba el recorrido accesible." }
+          ]
+        },
+        vic: {
+          sourceUrl: "https://www.victurisme.cat/",
+          photos: [
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/14/Pla%C3%A7a_Major_in_Vic_%28Spain%29_2012.jpg/960px-Pla%C3%A7a_Major_in_Vic_%28Spain%29_2012.jpg", alt: "Plaça Major de Vic", credit: "JopkeB · CC BY-SA 4.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Pla%C3%A7a_Major_in_Vic_(Spain)_2012.jpg" },
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/40/371_Edifici_a_la_pla%C3%A7a_Major%2C_10_-_c._Riera_%28Vic%29.jpg/960px-371_Edifici_a_la_pla%C3%A7a_Major%2C_10_-_c._Riera_%28Vic%29.jpg", alt: "Edificio histórico de la Plaça Major de Vic", credit: "Enric · CC BY-SA 4.0", creditUrl: "https://commons.wikimedia.org/wiki/File:371_Edifici_a_la_pla%C3%A7a_Major,_10_-_c._Riera_(Vic).jpg" }
+          ],
+          highlights: ["Plaça Major: corazón del centro y punto fácil para orientarse.", "Tiendas del casco antiguo y puestos del mercado cuando coincide con el día de mercado.", "Museu Episcopal para quien quiera añadir una visita cultural bajo techo."],
+          food: ["Busca llonganissa de Vic en tiendas locales y compara formatos para compartir.", "El mercado es una opción para mirar productos sin tener que reservar una comida."],
+          access: "El centro es compacto, pero las calles pueden tener adoquines. Confirma el día del mercado antes de organizar la visita.",
+          activities: [
+            { id: "placa-major", name: "Vuelta por Plaça Major y el centro", type: "Paseo y compras", duration: "1–2 h", cost: 0, costLabel: "Paseo sin entrada", description: "Recorrido corto con tiendas, cafés y bancos para descansar." },
+            { id: "vic-market", name: "Visita al mercado de Vic", type: "Mercado local", duration: "1–2 h", cost: 0, costLabel: "Acceso libre; compras aparte", description: "Añádelo si el mercado coincide con el día elegido; comprueba la agenda municipal." },
+            { id: "vic-museum", name: "Museu Episcopal de Vic", type: "Museo", duration: "1–2 h", cost: null, costLabel: "Entrada por confirmar", sourceUrl: "https://www.museuepiscopalvic.com/en/", description: "Revisa las tarifas, horarios y condiciones de acceso en la web oficial antes de ir." },
+            { id: "vic-cathedral", name: "Catedral de Sant Pere", type: "Patrimonio", duration: "45–60 min", cost: null, costLabel: "Acceso y visita interior por confirmar", description: "Combínala con el centro si está abierta; comprueba horarios y acceso en la agenda oficial." },
+            { id: "vic-leather-museum", name: "Museu de l'Art de la Pell", type: "Museo", duration: "1–1.5 h", cost: null, costLabel: "Entrada y horario por confirmar", description: "Una alternativa cubierta para un día frío; confirma apertura y accesibilidad antes de desplazarte." }
+          ]
+        },
+        montserrat: {
+          sourceUrl: "https://turistren.cat/es/trenes/cremallera-y-funiculares-de-montserrat/",
+          photos: [
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/Monistrol_-_Central_station_with_Cremallera_de_Montserrat_train.JPG/960px-Monistrol_-_Central_station_with_Cremallera_de_Montserrat_train.JPG", alt: "Tren de la Cremallera de Montserrat en Monistrol", credit: "Nils Öberg · CC BY-SA 3.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Monistrol_-_Central_station_with_Cremallera_de_Montserrat_train.JPG" },
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/44/MontserratMonastery02.jpg/960px-MontserratMonastery02.jpg", alt: "Exterior de la basílica y monasterio de Montserrat", credit: "Gyrofrog · CC BY-SA 2.5", creditUrl: "https://commons.wikimedia.org/wiki/File:MontserratMonastery02.jpg" },
+            { url: localDestinations.find((place) => place.id === "montserrat").image, alt: "Paisaje montañoso de Montserrat" }
+          ],
+          priceCheckedOn: "23/11/2026",
+          ticketOptions: [
+            { id: "trans-montserrat", name: "Trans Montserrat", priceFrom: 50, includes: "Desde Barcelona: metro, FGC, Cremallera o Aeri, funicular de Sant Joan y área audiovisual; Santa Cova sujeto a servicio.", includedActivities: ["montserrat-rack-railway", "montserrat-sant-joan", "montserrat-interactive", "montserrat-funicular-santa-cova"], url: "https://vol.cremallerademontserrat.cat/trans-montserrat-cremallera-placa-espanya?___store=cremallerademontserrat_en&___from_store=cremallerademontserrat_ca" },
+            { id: "tot-montserrat", name: "Tot Montserrat", priceFrom: 71.5, includes: "Desde Barcelona: transportes incluidos en Trans Montserrat, más museo y comida buffet.", includedActivities: ["montserrat-rack-railway", "montserrat-sant-joan", "montserrat-interactive", "montserrat-museum", "montserrat-funicular-santa-cova"], url: "https://vol.cremallerademontserrat.cat/tot-montserrat-cremallera-placa-espanya?___store=cremallerademontserrat_en&___from_store=cremallerademontserrat_ca" }
+          ],
+          highlights: ["La Cremallera actual sube desde Monistrol hasta el santuario en unos 15 minutos; recorre parte del trazado histórico, pero no es el tren antiguo original.", "El funicular de Sant Joan llega a un mirador cercano a 1.000 m y da acceso a paseos de distintas exigencias.", "FGC publica rutas cortas, exposiciones y pases combinados; algunas tarifas incluyen varios transportes."],
+          food: ["Lleva agua y algo sencillo para comer; compara los precios antes de comprar en el recinto.", "Si el grupo quiere comer allí, confirma horarios y opciones abiertas en invierno."],
+          access: "FGC indica tren y andenes adaptados, pero la excursión completa incluye transbordos, pendientes y desnivel. Confirma la accesibilidad de cada tramo y la operativa de los funiculares.",
+          activities: [
+            { id: "montserrat-rack-railway", name: "Subida en la Cremallera de Montserrat", type: "Tren de montaña", duration: "15 min por trayecto", cost: null, includedByPackage: ["trans-montserrat", "tot-montserrat"], costLabel: "Billete individual por confirmar · pases desde 50 €", sourceUrl: "https://turistren.cat/es/trenes/cremallera-y-funiculares-de-montserrat/cremallera-de-montserrat/", description: "La línea actual recorre parte del trazado histórico. El tren original dejó de circular en 1957; esta Cremallera moderna llega hasta el santuario y tiene vistas panorámicas." },
+            { id: "montserrat-sant-joan", name: "Funicular de Sant Joan y mirador", type: "Funicular y paisaje", duration: "1–2 h", cost: null, includedByPackage: ["trans-montserrat", "tot-montserrat"], costLabel: "Incluido en algunos pases · tarifa individual por confirmar", sourceUrl: "https://turistren.cat/es/trenes/cremallera-y-funiculares-de-montserrat/funicular-de-sant-joan/", description: "Sube al mirador de la estación superior, cerca de 1.000 m. Comprueba servicio, accesibilidad y condiciones meteorológicas." },
+            { id: "montserrat-hermitas-easy", name: "Paseo corto a las ermitas de Sant Joan y Sant Onofre", type: "Paseo fácil", duration: "30–45 min · 1,58 km", cost: 0, costLabel: "Paseo sin entrada · transporte de acceso aparte", sourceUrl: "https://turistren.cat/es/experiencias/itinerarios-ermitas-montserrat/", description: "Itinerario oficial descrito como fácil, con unos 86 m de desnivel. Aun así, el grupo debe valorar el terreno y su ritmo." },
+            { id: "montserrat-interactive", name: "Exposición audiovisual interactiva", type: "Cultura bajo techo", duration: "15 min", cost: null, includedByPackage: ["trans-montserrat", "tot-montserrat"], costLabel: "Incluida en algunos pases · tarifa suelta por confirmar", sourceUrl: "https://turistren.cat/es/experiencias/exposicion-interactiva/", description: "Recorrido audiovisual breve sobre la vida del monasterio. Buena opción para alternar con paseos al aire libre." },
+            { id: "montserrat-museum", name: "Museu de Montserrat", type: "Museo", duration: "1–2 h", cost: null, includedByPackage: ["tot-montserrat"], costLabel: "Incluido en Tot Montserrat · tarifa suelta por confirmar", sourceUrl: "https://www.museudemontserrat.com/en/", description: "Colecciones de arte e historia en un espacio cubierto. Revisa horarios, entradas y accesibilidad." },
+            { id: "montserrat-santa-cova", name: "Camino de la Santa Cova y sus esculturas", type: "Naturaleza y arte", duration: "1–2 h", cost: null, costLabel: "Acceso y funicular sujetos a operativa", sourceUrl: "https://turistren.cat/es/experiencias/naturalez-arte-camino-santa-cova/", description: "Paseo paisajístico con arte religioso; puede incluir pendiente y pavimento irregular. Confirma si el funicular funciona en la fecha elegida." },
+            { id: "montserrat-funicular-santa-cova", name: "Funicular de la Santa Cova", type: "Funicular", duration: "Trayecto corto · horario por confirmar", cost: null, includedByPackage: ["trans-montserrat", "tot-montserrat"], costLabel: "Incluido en algunos pases si está en servicio", sourceUrl: "https://turistren.cat/es/trenes/cremallera-y-funiculares-de-montserrat/funicular-de-santa-cova/", description: "El operador indica que puede estar fuera de servicio por mantenimiento. Confirma su reapertura y tarifa para el día de visita." },
+            { id: "montserrat-railway-exhibit", name: "Exposición histórica de la Cremallera", type: "Historia ferroviaria", duration: "30–45 min", cost: null, costLabel: "Entrada y horario por confirmar", sourceUrl: "https://turistren.cat/es/trenes/cremallera-y-funiculares-de-montserrat/cremallera-de-montserrat/", description: "Pequeña exposición en la antigua estación de Monistrol Vila; consulta si está abierta y cómo encaja con el transbordo." },
+            { id: "montserrat-sant-jeroni", name: "Ruta hasta Sant Jeroni", type: "Senderismo exigente", duration: "2.5–3.5 h", cost: 0, costLabel: "Sin entrada; transporte de acceso aparte", sourceUrl: "https://turistren.cat/es/experiencias/senderismo-camino-sant-joan/", description: "La ruta completa requiere varias horas y esfuerzo físico. No es la opción tranquila; escogerla solo si todas las personas se sienten cómodas con caminatas largas." }
+          ]
+        },
+        figueres: {
+          sourceUrl: "https://www.salvador-dali.org/en/visit/dali-theatre-museum/",
+          photos: [
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/45/Detall_d%27un_pa_de_tres_crostons_de_la_paret_exterior_de_la_Torre_Galatea_del_Teatre-Museu_Dal%C3%AD_de_Figueres.JPG/960px-Detall_d%27un_pa_de_tres_crostons_de_la_paret_exterior_de_la_Torre_Galatea_del_Teatre-Museu_Dal%C3%AD_de_Figueres.JPG", alt: "Detalle de la fachada de la Torre Galatea del Museu Dalí", credit: "Francesc Vernet López · CC BY-SA 3.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Detall_d%27un_pa_de_tres_crostons_de_la_paret_exterior_de_la_Torre_Galatea_del_Teatre-Museu_Dal%C3%AD_de_Figueres.JPG" },
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/Figueres_27.jpg/960px-Figueres_27.jpg", alt: "Torre Gorgot del Teatre-Museu Dalí en Figueres", credit: "Bertrand GRONDIN · CC BY-SA 3.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Figueres_27.jpg" }
+          ],
+          highlights: ["Teatre-Museu Dalí, principal visita artística de la ciudad.", "Centro peatonal con plazas, comercios y cafeterías.", "Se puede combinar el museo con un paseo corto sin llenar todo el día."],
+          food: ["Busca menú del día en el centro y revisa si incluye bebida y postre.", "Reserva la comida solo después de confirmar el horario de visita al museo."],
+          access: "El museo puede requerir recorrido prolongado y tiene condiciones propias de acceso. Revisa información oficial antes de comprar entradas.",
+          activities: [
+            { id: "dali-museum", name: "Teatre-Museu Dalí", type: "Museo", duration: "2–3 h", cost: 18.5, costLabel: "18,50 € general · 15 € reducida para mayores de 65 (revisar requisitos)", sourceUrl: "https://www.salvador-dali.org/en/visit/dali-theatre-museum/", description: "Tarifa publicada en la web oficial consultada el 23/11/2026. El total del grupo usa la general porque el planificador solo pregunta cuántas personas viajan. Confirma precio 2027, reserva y accesibilidad antes de ir." },
+            { id: "figueres-center", name: "Paseo por el centro de Figueres", type: "Paseo urbano", duration: "1–1.5 h", cost: 0, costLabel: "Paseo sin entrada", description: "Un recorrido corto por plazas y calles comerciales, adaptable al tiempo disponible." },
+            { id: "figueres-toy-museum", name: "Museu del Joguet de Catalunya", type: "Museo", duration: "1–1.5 h", cost: null, costLabel: "Entrada por confirmar", sourceUrl: "https://www.mjc.cat/", description: "Colección cubierta en el centro; revisa horarios, tarifas y ascensores antes de la visita." },
+            { id: "figueres-sant-ferran", name: "Castell de Sant Ferran", type: "Historia y paisaje", duration: "1.5–2 h", cost: null, costLabel: "Entrada y visita guiada por confirmar", description: "La fortaleza es extensa y puede requerir caminatas largas; consulta el tipo de recorrido y accesibilidad." },
+            { id: "figueres-emporda-museum", name: "Museu de l'Empordà", type: "Arte e historia local", duration: "1–1.5 h", cost: null, costLabel: "Entrada y apertura por confirmar", description: "Alternativa cultural bajo techo; consulta la agenda municipal para el día de la visita." }
+          ]
+        },
+        perpignan: {
+          sourceUrl: "https://www.perpignanmediterranee-tourisme.com/en/",
+          railUrl: "https://www.sncf-connect.com/en-en/train/route/barcelona/perpignan",
+          railNote: "SNCF publica actualmente trenes Barcelona Sants–Perpiñán desde 1 h 26 min y desde 35 € por trayecto. Es solo referencia de consulta del 23/11/2026, no la tarifa ni el horario de enero–febrero de 2027; suma Rodalies desde Sant Celoni y margen para el transbordo.",
+          photos: [
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Perpignan_Castillet_1.jpg/960px-Perpignan_Castillet_1.jpg", alt: "Fachada del Castillet de Perpiñán", credit: "Palauenc05 · CC BY-SA 4.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Perpignan_Castillet_1.jpg" },
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a1/Le_Castillet_-_panoramio.jpg/960px-Le_Castillet_-_panoramio.jpg", alt: "Vista del Castillet desde el centro de Perpiñán", credit: "Jorge Franganillo · CC BY 3.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Le_Castillet_-_panoramio.jpg" }
+          ],
+          highlights: ["Le Castillet y el centro histórico, con plazas y calles comerciales.", "Paseo por el Quai Vauban y las orillas del río Têt.", "Revisa con anticipación las conexiones de tren o bus desde Sant Celoni."],
+          food: ["Busca una panadería o mercado para una pausa sencilla.", "Ten en cuenta que se paga en euros, pero algunos horarios y comercios pueden variar por temporada."],
+          access: "La caminata por el centro puede hacerse por tramos. Confirma horarios de transporte y deja margen para las conexiones internacionales.",
+          dayPlan: [
+            { time: "MAÑANA", title: "Castillet, plaza de la Loge y casco histórico", description: "Empieza por el centro bajo y compacto; mira el Castillet por fuera y alterna calles con una pausa de café. La visita interior depende de apertura y escaleras.", rest: "Ritmo fácil si se evita subir al Palais des Rois de Majorque." },
+            { time: "TARDE", title: "Quai Vauban y compras locales", description: "Paseo a orillas del canal y regreso por calles comerciales. Deja el palacio como opción solo si el grupo está cómodo con cuestas.", rest: "Reserva una pausa sentada antes de volver a la estación." },
+            { time: "NOCHE", title: "Cena temprana en el centro y vuelta con margen", description: "Elige un restaurante cerca del alojamiento o de la estación. En invierno no apures la noche: comprueba el último tren y los enlaces a Sant Celoni.", rest: "Para una jornada tranquila, dormir en Perpiñán suele ser mejor que correr al último enlace." }
+          ],
+          activities: [
+            { id: "castillet", name: "Paseo por el centro y Le Castillet", type: "Historia y compras", duration: "1.5–2 h", cost: 0, costLabel: "Exterior y paseo sin entrada", description: "Recorrido por el exterior del monumento, plazas y calles del centro; la visita interior se cotiza aparte." },
+            { id: "perpignan-market", name: "Pausa en un mercado o cafetería", type: "Gastronomía", duration: "45–60 min", cost: null, costLabel: "Consumo según el local", description: "Una parada flexible para probar algo local o descansar; revisa qué está abierto." },
+            { id: "perpignan-palace", name: "Palais des Rois de Majorque", type: "Historia y miradores", duration: "1.5–2 h", cost: null, costLabel: "Entrada y tarifa por confirmar", description: "El recinto tiene desniveles y escaleras; confirma el recorrido accesible antes de comprar." },
+            { id: "perpignan-old-town", name: "Recorrido por el centro histórico", type: "Paseo urbano", duration: "1–2 h", cost: 0, costLabel: "Paseo sin entrada; compras aparte", description: "Agrupa plazas, fachadas y tiendas en un tramo corto para caminar menos." },
+            { id: "perpignan-castillet-inside", name: "Interior de Le Castillet", type: "Museo y patrimonio", duration: "45–60 min", cost: null, costLabel: "Apertura y entrada por confirmar", description: "Consulta si el monumento está abierto y si hay escaleras antes de añadir la visita." }
+          ]
+        },
+        collioure: {
+          sourceUrl: "https://www.tourisme-collioure.com/",
+          railUrl: "https://www.tourisme-collioure.com/mon-sejour/collioure-pratique/venir-a-collioure-et-se-deplacer-collioure/venir-en-train-collioure/",
+          railNote: "Se llega por tren regional desde Perpiñán; añade una conexión más y comprueba el TER de regreso. Desde Sant Celoni es una escapada larga: mejor dormir en Perpiñán o Collioure que intentar una visita relámpago.",
+          photos: [
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Le_port_de_Collioure_%285722096100%29.jpg/960px-Le_port_de_Collioure_%285722096100%29.jpg", alt: "Puerto y paseo marítimo de Collioure", credit: "Jean-Pierre Dalbéra · CC BY 2.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Le_port_de_Collioure_(5722096100).jpg" }
+          ],
+          highlights: ["Puerto, iglesia de Notre-Dame-des-Anges y castillo real frente al mar.", "Recorrido artístico Fauvismo, con reproducciones de cuadros en el paisaje.", "Aldeas y calas de la Côte Vermeille; los caminos pueden ser empinados."],
+          food: ["Busca anchoas de Collioure en tiendas especializadas y compara formatos/precios.", "Hay vinos locales; compra solo si te sirve llevarlos y revisa conservación y equipaje."],
+          access: "El paseo del puerto es bonito y relativamente corto, pero el centro tiene adoquines, pendientes y tramos irregulares. El camino costero no es accesible en toda su longitud.",
+          dayPlan: [
+            { time: "MAÑANA", title: "Puerto, iglesia y castillo desde el exterior", description: "Recorre el frente marítimo con luz de mañana y elige solo una visita interior. Hay adoquines y desniveles alrededor del casco antiguo.", rest: "Sentarse frente al puerto es una pausa fácil; evita sumar todas las escaleras del castillo." },
+            { time: "TARDE", title: "Ruta Fauvismo en versión corta", description: "Busca las reproducciones de Matisse y Derain y compara la vista actual con las obras. Quédate en el núcleo urbano; los tramos hacia las colinas tienen pendiente.", rest: "El Musée d'Art Moderne está anunciado cerrado hasta 2028; no lo planifiques para este viaje." },
+            { time: "NOCHE", title: "Cena junto al puerto, paseo breve y descanso", description: "Prueba anchoas locales si apetece y disfruta del puerto iluminado desde el paseo llano. No recomendamos hacer el sendero costero de noche.", rest: "Confirma transporte TER antes de cenar; en invierno hay menos servicios y menos luz." }
+          ],
+          activities: [
+            { id: "collioure-harbor", name: "Paseo corto por el puerto y la bahía", type: "Costa y paisaje", duration: "45–75 min", cost: 0, costLabel: "Paseo exterior sin entrada", description: "El tramo más fotogénico y fácil de adaptar: puerto, coloridas fachadas y bancos para descansar." },
+            { id: "collioure-fauvism", name: "Paseo artístico Fauvismo", type: "Arte al aire libre", duration: "1–1.5 h", cost: 0, costLabel: "Recorrido exterior; mapa/visita guiada por confirmar", sourceUrl: "https://www.tourisme-collioure.com/mon-collioure/collioure-en-un-1-jour/collioure-terre-dartistes/", description: "Sigue algunas reproducciones de Matisse y Derain por el centro; elige una parte y evita las subidas si el grupo prefiere caminar poco." },
+            { id: "collioure-castle", name: "Château Royal de Collioure", type: "Historia y vistas", duration: "1–1.5 h", cost: null, costLabel: "Entrada y accesibilidad por confirmar", sourceUrl: "https://www.tourisme-collioure.com/activites-collioure/les-sites-a-ne-pas-manquer-collioure/le-chateau-royal-collioure/", description: "Visita histórica junto al puerto; comprueba desniveles, horarios y tarifa en invierno antes de subir." },
+            { id: "collioure-anchoas", name: "Tiendas de anchoas y productos locales", type: "Gastronomía y compras", duration: "30–45 min", cost: null, costLabel: "Compra según producto y tienda", description: "Busca conservas de anchoas de Collioure en comercios locales; revisa el tamaño del envase y cómo transportarlo." },
+            { id: "collioure-modern-museum", name: "Musée d'Art Moderne · comprobar cierre", type: "Arte bajo techo", duration: "45–90 min", cost: null, costLabel: "Cerrado; reapertura anunciada para 2028", sourceUrl: "https://www.tourisme-collioure.com/activites-collioure/les-sites-a-ne-pas-manquer-collioure/le-musee-dart-moderne-collioure/", description: "El sitio oficial anuncia el museo cerrado y una reapertura para 2028. No lo cuentes como visita disponible en enero–febrero de 2027; consulta exposiciones fuera del museo." }
+          ]
+        },
+        montpellier: {
+          sourceUrl: "https://www.montpellier-france.com/",
+          railUrl: "https://www.sncf-connect.com/en-en/train/route/barcelona/montpellier",
+          railNote: "SNCF publica actualmente el trayecto Barcelona Sants–Montpellier desde 3 h 17 min y desde 39 € por trayecto, con plazas y horarios limitados. Es una referencia consultada el 23/11/2026, no precio de 2027; añade el tren Sant Celoni–Barcelona y conexiones.",
+          photos: [
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b5/Montpellier-_Place_de_la_Com%C3%A9die_-_52262234358.jpg/960px-Montpellier-_Place_de_la_Com%C3%A9die_-_52262234358.jpg", alt: "Place de la Comédie en Montpellier", credit: "Jorge Franganillo · CC BY 2.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Montpellier-_Place_de_la_Com%C3%A9die_-_52262234358.jpg" },
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/Montpellier-_Porte_du_Peyrou_-_52276647290.jpg/960px-Montpellier-_Porte_du_Peyrou_-_52276647290.jpg", alt: "Porte du Peyrou, arco histórico de Montpellier", credit: "Jorge Franganillo · CC BY 2.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Montpellier-_Porte_du_Peyrou_-_52276647290.jpg" }
+          ],
+          highlights: ["Place de la Comédie y la Explanada Charles-de-Gaulle para empezar sin coche.", "Écusson: callejones medievales, cafés, pequeñas tiendas y plazas.", "Promenade du Peyrou para vistas y jardines; hay desnivel, mejor hacerla sin prisa."],
+          food: ["Busca mercados y panaderías de barrio para una comida sencilla.", "Prueba productos de Occitania y pregunta por opciones de menú; precios y aperturas cambian en invierno."],
+          access: "El centro es peatonal y tiene tranvías, pero el Écusson conserva pavimento irregular. El Peyrou tiene una subida; se puede reservar energía y usar tranvía/taxi para volver.",
+          dayPlan: [
+            { time: "MAÑANA", title: "Comédie y paseo por la Explanada", photoIndex: 0, description: "Empieza en Place de la Comédie y avanza hacia la Explanada Charles-de-Gaulle. Es una entrada amable al centro con terrazas y bancos.", rest: "Aprovecha la pausa de café antes de entrar al Écusson." },
+            { time: "TARDE", title: "Callejones del Écusson y Peyrou", photoIndex: 1, description: "Elige pocas calles históricas y termina en el arco y la Promenade du Peyrou. Hay adoquines y una subida; acorta el tramo si hace frío o llueve.", rest: "Usa el tranvía o taxi para ahorrar caminata al final." },
+            { time: "NOCHE", title: "Regreso a Comédie para cenar", photoIndex: 0, description: "Vuelve a una zona iluminada y con transporte, cena temprano y confirma el tranvía a la estación o al alojamiento.", rest: "Con el viaje desde Barcelona, recomendamos dos noches para no hacer todo en un solo día." }
+          ],
+          activities: [
+            { id: "montpellier-comedie", name: "Place de la Comédie y las Tres Gracias", type: "Plaza y paseo urbano", duration: "45–60 min", cost: 0, photoIndex: 0, costLabel: "Paseo exterior", description: "El corazón peatonal recomendado por la oficina turística; cafés, arquitectura y punto sencillo para orientarse." },
+            { id: "montpellier-ecusson", name: "Calles medievales del Écusson", type: "Paseo y compras", duration: "1.5–2 h", cost: 0, photoIndex: 0, costLabel: "Paseo sin entrada; compras aparte", description: "Escoge unas pocas calles —Rue de la Loge, Rue de la Valfère y Rue du Bras de Fer— y descansa entre tiendas." },
+            { id: "montpellier-peyrou", name: "Promenade du Peyrou y arco del triunfo", type: "Miradores y jardines", duration: "1–1.5 h", cost: 0, photoIndex: 1, costLabel: "Exterior sin entrada; visita interior por confirmar", description: "Paseo amplio con vistas, recomendado por la oficina turística. Incluye una subida; comprueba accesibilidad y clima." },
+            { id: "montpellier-fabre", name: "Musée Fabre", type: "Arte bajo techo", duration: "1.5–2 h", cost: null, costLabel: "Tarifa, apertura y accesibilidad por confirmar", sourceUrl: "https://www.museefabre.fr/en", description: "Museo de bellas artes para una tarde fría o lluviosa; confirma exposición y condiciones para la fecha." },
+            { id: "montpellier-market", name: "Mercado y merienda local", type: "Gastronomía y compras", duration: "45–60 min", cost: null, costLabel: "Consumo según el puesto", description: "Elige una plaza/mercado de camino y una merienda sencilla; revisa qué puestos abren en invierno." }
+          ]
+        },
+        carcassonne: {
+          sourceUrl: "https://whc.unesco.org/en/list/345/",
+          railUrl: "https://www.sncf-connect.com/en-en/train/route/barcelona/carcassonne",
+          railNote: "SNCF muestra conexiones Barcelona Sants–Carcasona desde unos 3 h 13 min. Añade el trayecto desde Sant Celoni y revisa el transbordo: por distancia y pocas salidas no es una excursión cómoda de ida y vuelta en el día.",
+          photos: [
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Ciudadela%2C_Carcasona%2C_Francia%2C_2023-01-07%2C_DD_216-218_HDR.jpg/960px-Ciudadela%2C_Carcasona%2C_Francia%2C_2023-01-07%2C_DD_216-218_HDR.jpg", alt: "Ciudadela amurallada de Carcasona al anochecer", credit: "Diego Delso · CC BY-SA 4.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Ciudadela,_Carcasona,_Francia,_2023-01-07,_DD_216-218_HDR.jpg" },
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a3/PontVieuxCarcasonne.jpg/960px-PontVieuxCarcasonne.jpg", alt: "Pont-Vieux, puente histórico de Carcasona", credit: "Martinvl · CC BY-SA 4.0", creditUrl: "https://commons.wikimedia.org/wiki/File:PontVieuxCarcasonne.jpg" }
+          ],
+          highlights: ["La Cité fortificada —Patrimonio Mundial UNESCO— es la visita principal.", "Bastide Saint-Louis, mercado y canal du Midi ofrecen un paseo más llano en la ciudad baja.", "La ciudadela está en alto y conserva piedra irregular; prioriza una sola zona cada vez."],
+          food: ["Prueba cassoulet si el presupuesto lo permite; pregunta por una ración para compartir.", "Busca panadería y menú del día en la Bastide, fuera de las calles más concurridas de la Cité."],
+          access: "La Cité tiene adoquines, desniveles y muchas distancias. Desde la estación hasta la ciudadela hay subida; comprueba lanzadera/taxi local y no cuentes con recorrer las murallas completas.",
+          dayPlan: [
+            { time: "MAÑANA", title: "Entrada a la Cité y circuito corto", description: "Llega temprano, recorre la puerta principal y las calles de la ciudadela antes de que se llenen. El terreno es irregular: elige un bucle corto.", rest: "No prometemos accesibilidad total; reserva descansos y usa transporte local para la subida." },
+            { time: "TARDE", title: "Pausa larga y Bastide Saint-Louis", description: "Baja a la ciudad nueva en taxi/lanzadera si está operativa y pasea por una plaza o tramo del canal du Midi.", rest: "No hagas la bajada a pie si el grupo está cansado; confirma el servicio de regreso." },
+            { time: "NOCHE", title: "Ver la Cité iluminada desde un punto cercano", description: "Disfruta la vista desde el exterior y vuelve al alojamiento temprano. En enero anochece pronto y el suelo de piedra puede resbalar.", rest: "Quédate una noche: los trenes de regreso no deben condicionar el paseo nocturno." }
+          ],
+          activities: [
+            { id: "carcassonne-cite", name: "Paseo breve por la Cité", type: "Historia y arquitectura", duration: "1.5–2 h", cost: 0, costLabel: "Calles exteriores sin entrada; castillo/murallas aparte", description: "La ciudad medieval fortificada es el gran imprescindible. Mantén el recorrido corto por el empedrado y las pendientes." },
+            { id: "carcassonne-castle", name: "Château Comtal y murallas", type: "Patrimonio UNESCO", duration: "1.5–2 h", cost: 13, costLabel: "13 € adulto publicados el 23/11/2026; revisar 2027 y descuentos", sourceUrl: "https://www.remparts-carcassonne.fr/en/visit/practical-information", description: "La tarifa adulta publicada es una referencia actual, no una tarifa garantizada para 2027. El recorrido incluye escalones y terreno irregular; revisa horarios de invierno y acceso." },
+            { id: "carcassonne-bastide", name: "Bastide Saint-Louis y Place Carnot", type: "Paseo urbano y compras", duration: "1–1.5 h", cost: 0, costLabel: "Paseo sin entrada", description: "Alternativa más llana para tiendas, cafés y mercado; buena para descansar de la ciudadela." },
+            { id: "carcassonne-canal", name: "Paseo corto junto al Canal du Midi", type: "Paseo tranquilo", duration: "45–75 min", cost: 0, costLabel: "Acceso libre; clima y terreno por revisar", description: "Elige un tramo cercano y vuelve antes de que anochezca; puede hacer frío y haber barro en invierno." },
+            { id: "carcassonne-local-food", name: "Cassoulet y productos del Aude", type: "Gastronomía local", duration: "1–1.5 h", cost: null, costLabel: "Precio según restaurante o tienda", description: "Prueba una especialidad local en porción compartida o compra una conserva; revisa precio y peso." }
+          ]
+        },
+        lyon: {
+          sourceUrl: "https://en.visiterlyon.com/",
+          railUrl: "https://www.sncf-connect.com/en-en/train/route/barcelona/lyon",
+          railNote: "SNCF publica actualmente conexiones Barcelona Sants–Lyon desde 5 h 14 min y desde 59 € por trayecto en algunas fechas. Consulta del 23/11/2026; no es una tarifa de 2027 ni incluye Sant Celoni–Sants. Por duración, recomendamos al menos dos noches.",
+          photos: [
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9d/Lyon_Place_Bellecour_1.jpg/960px-Lyon_Place_Bellecour_1.jpg", alt: "Place Bellecour en Lyon", credit: "Andrzej Otrębski · CC BY-SA 4.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Lyon_Place_Bellecour_1.jpg" },
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2e/Musee_des_Miniatures_et_Decors_de_Cinema_-_Rue_Saint-Jean%2C_Vieux_Lyon_%2835512302495%29.jpg/960px-Musee_des_Miniatures_et_Decors_de_Cinema_-_Rue_Saint-Jean%2C_Vieux_Lyon_%2835512302495%29.jpg", alt: "Calle Saint-Jean en el Vieux Lyon", credit: "Elliott Brown · CC BY-SA 2.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Musee_des_Miniatures_et_Decors_de_Cinema_-_Rue_Saint-Jean,_Vieux_Lyon_(35512302495).jpg" },
+            { url: "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/13/Bateau_touristique_fluvial_sur_la_Sa%C3%B4ne_%C3%A0_Lyon_en_juin_2019_%28photo_depuis_la_passerelle_du_palais_de_justice%29.jpg/960px-Bateau_touristique_fluvial_sur_la_Sa%C3%B4ne_%C3%A0_Lyon_en_juin_2019_%28photo_depuis_la_passerelle_du_palais_de_justice%29.jpg", alt: "Orilla del río Saona en Lyon", credit: "Benoît Prieur · CC0", creditUrl: "https://commons.wikimedia.org/wiki/File:Bateau_touristique_fluvial_sur_la_Sa%C3%B4ne_%C3%A0_Lyon_en_juin_2019_(photo_depuis_la_passerelle_du_palais_de_justice).jpg" }
+          ],
+          highlights: ["Presqu'île, Place Bellecour y Place des Terreaux para arquitectura y tiendas.", "Vieux Lyon y sus traboules: calles preciosas, pero empedradas y con pasajes que pueden cerrar.", "Fourvière merece la vista; usa el funicular en vez de subir la colina a pie."],
+          food: ["Prueba una praline rose en una panadería; los bouchons tienen menús de precio variable.", "Compara menús de mediodía y reserva una comida sentada; la gastronomía local suele ser abundante."],
+          access: "Presqu'île es la zona más cómoda para caminar; Vieux Lyon tiene adoquines y Fourvière es una colina. Usa metro/funicular para evitar desnivel y verifica ascensores y servicio.",
+          dayPlan: [
+            { time: "MAÑANA", title: "Presqu'île: Bellecour a Terreaux", photoIndex: 0, description: "Paseo urbano por plazas, escaparates y fachadas. Es la mejor zona para empezar, con bancos, cafés y transporte cerca.", rest: "Tramo relativamente llano; limita la vuelta a una orilla para no cruzar la ciudad." },
+            { time: "TARDE", title: "Vieux Lyon y una traboule abierta", photoIndex: 1, description: "Cruza al barrio histórico, recorre Rue Saint-Jean y entra solo en pasajes señalizados abiertos al público.", rest: "Adoquines y desnivel: vuelve en metro si el grupo se cansa; no subas Fourvière a pie." },
+            { time: "NOCHE", title: "Ribera del Saona y cena temprana", photoIndex: 2, description: "Mira las fachadas desde los muelles y cena cerca del transporte. El paseo junto al río es bonito con luz, pero frío y ventoso en invierno.", rest: "Para Fourvière, consulta el funicular y los horarios antes de decidir una visita nocturna." }
+          ],
+          activities: [
+            { id: "lyon-presquile", name: "Paseo por Presqu'île y Place Bellecour", type: "Paseo urbano y compras", duration: "1.5–2 h", cost: 0, photoIndex: 0, costLabel: "Paseo sin entrada; compras aparte", description: "Plazas monumentales y calles comerciales en un recorrido mayormente llano que se puede acortar fácilmente." },
+            { id: "lyon-vieux", name: "Vieux Lyon y traboules señalizadas", type: "Historia y arquitectura", duration: "1.5–2 h", cost: 0, photoIndex: 1, costLabel: "Calles públicas; visitas guiadas por confirmar", sourceUrl: "https://en.visiterlyon.com/", description: "Paseo por Saint-Jean, patios y pasajes públicos. Respeta las zonas residenciales; hay adoquines y accesos que pueden cerrar." },
+            { id: "lyon-saone", name: "Paseo junto al Saona", type: "Ribera y paisaje", duration: "45–75 min", cost: 0, photoIndex: 2, costLabel: "Paseo exterior", description: "Una de las vistas urbanas más fotogénicas, especialmente al atardecer; abrígate y elige solo un tramo." },
+            { id: "lyon-fourviere", name: "Fourvière en funicular", type: "Mirador y patrimonio", duration: "1.5–2 h", cost: null, costLabel: "Billete, horarios y accesibilidad por confirmar", sourceUrl: "https://www.tcl.fr/en", description: "Sube en funicular para evitar la cuesta y confirma el servicio. El mirador puede tener pavimento irregular y frío." },
+            { id: "lyon-croix-rousse", name: "Murales y seda en Croix-Rousse", type: "Artesanía y barrio", duration: "1.5–2 h", cost: null, costLabel: "Tiendas y visitas según apertura", description: "Barrio con historia de la seda y talleres; tiene cuestas y escaleras, así que prioriza una visita concreta y vuelve en transporte." }
+          ]
+        },
+        andorra: {
+          sourceUrl: "https://visitandorra.com/en/",
+          highlights: ["Avinguda Meritxell: principal zona de compras de Andorra la Vella.", "Barri Antic y plazas del centro para alternar tiendas con descansos.", "El bus desde Cataluña es largo: compara duración, paradas y precio total."],
+          food: ["Compara menús y precios antes de sentarte en las calles comerciales.", "Deja espacio para una pausa caliente si hace frío; el gasto depende del local."],
+          access: "La avenida comercial es extensa y tiene cambios de nivel. Planifica descansos y confirma el punto de llegada del bus para evitar caminatas innecesarias.",
+          activities: [
+            { id: "meritxell", name: "Compras por Avinguda Meritxell", type: "Compras", duration: "1.5–3 h", cost: 0, costLabel: "Paseo sin entrada; compras aparte", description: "Recorre solo el tramo que interese y fija una pausa para no caminar de más." },
+            { id: "andorra-old-town", name: "Paseo por el Barri Antic", type: "Paseo urbano", duration: "1–1.5 h", cost: 0, costLabel: "Paseo sin entrada", description: "Añade una vuelta breve por el centro histórico, ajustando el recorrido a las pendientes." },
+            { id: "andorra-casa-vall", name: "Casa de la Vall", type: "Patrimonio", duration: "45–60 min", cost: null, costLabel: "Visita y tarifa por confirmar", description: "Consulta horarios y disponibilidad de visitas antes de organizar el día." },
+            { id: "andorra-caldea", name: "Caldea", type: "Aguas termales", duration: "2–3 h", cost: null, costLabel: "Entrada variable según fecha y horario", sourceUrl: "https://www.caldea.com/en/", description: "Reserva con anticipación y revisa requisitos de edad, movilidad, vestimenta y acceso antes de comprar." },
+            { id: "andorra-central-walk", name: "Paseo corto por Escaldes-Engordany", type: "Paseo y descanso", duration: "45–90 min", cost: 0, costLabel: "Paseo sin entrada", description: "Una opción flexible para estirar las piernas y sentarse en una cafetería; consumo aparte." }
+          ]
+        },
+        madrid: {
+          sourceUrl: "https://www.esmadrid.com/en",
+          highlights: ["Parque del Retiro para pasear y descansar al aire libre.", "Centro histórico y Gran Vía para combinar arquitectura y tiendas.", "Para que el viaje en tren valga la pena, conviene alojarse más de una noche."],
+          food: ["Busca menú del día fuera de las zonas más concurridas.", "Elige una sola zona de compras por jornada y evita cruzar la ciudad varias veces."],
+          access: "Las distancias dentro de Madrid son grandes. Combina tramos cortos con transporte público y reserva tiempo para sentarse.",
+          activities: [
+            { id: "retiro", name: "Paseo y descanso en el Retiro", type: "Parque", duration: "1.5–2 h", cost: 0, costLabel: "Acceso libre", description: "Escoge una zona del parque y adapta la vuelta a la energía del grupo." },
+            { id: "madrid-center", name: "Centro y tiendas de Gran Vía", type: "Compras y ciudad", duration: "2–3 h", cost: 0, costLabel: "Paseo sin entrada; compras aparte", description: "Agrupa tiendas y visitas cercanas para reducir desplazamientos." },
+            { id: "madrid-prado", name: "Museo Nacional del Prado", type: "Museo", duration: "2–3 h", cost: null, costLabel: "Entrada y franja horaria por confirmar", sourceUrl: "https://www.museodelprado.es/en/visit/tickets", description: "Reserva la franja con anticipación y comprueba tarifas reducidas, accesibilidad y horarios de invierno." },
+            { id: "madrid-plaza-mayor", name: "Plaza Mayor y calles del centro", type: "Paseo y compras", duration: "1–1.5 h", cost: 0, costLabel: "Paseo sin entrada; consumos aparte", description: "Un circuito céntrico que se puede acortar y combinar con descansos en cafeterías." },
+            { id: "madrid-reina-sofia", name: "Museo Reina Sofía", type: "Arte", duration: "1.5–2 h", cost: null, costLabel: "Entrada por confirmar; consulta días gratuitos", sourceUrl: "https://www.museoreinasofia.es/en/visit", description: "Consulta precios y horarios gratuitos en la web oficial; planifica una sola visita de museo por día." }
+          ]
+        }
+      };
+
+      const shoppingIdeas = {
+        barcelona: { area: "Born, Gòtic y Santa Caterina", pick: "Busca cerámica, ilustraciones y diseño hecho en Catalunya en tiendas pequeñas. Para comida, compra en mercado solo si puedes llevarla sin cargar el paseo.", budget: "Compara precios fuera de las calles de mayor tránsito turístico.", url: "https://www.barcelonaturisme.com/wv3/en/" },
+        girona: { area: "Barri Vell y centro bajo", pick: "Cerámica, joyería y productos de pequeños talleres; un xuixo de Girona es un recuerdo comestible fácil de compartir.", budget: "Mira escaparates primero y compra después: las cuestas hacen incómodo cargar bolsas.", url: "https://www.girona.cat/turisme/eng/" },
+        vic: { area: "Plaça Major y mercado", pick: "Llonganissa de Vic en envase cerrado y productos de mercado; pregunta por artesanía y cuero local.", budget: "Confirma el día del mercado en la agenda municipal antes de viajar.", url: "https://www.victurisme.cat/" },
+        montserrat: { area: "Tiendas del recinto", pick: "Busca mató, miel y productos locales pequeños; compra al final para no llevar peso durante la subida.", budget: "Compara formatos y precios con tiendas fuera del recinto si el transporte lo permite.", url: "https://turistren.cat/es/trenes/cremallera-y-funiculares-de-montserrat/" },
+        figueres: { area: "Centro y entorno del museo", pick: "Productos del Empordà, aceite, vino para quien consuma y láminas o postales de arte.", budget: "Las tiendas de museo suelen ser más caras; una postal o producto pequeño mantiene el gasto bajo.", url: "https://www.salvador-dali.org/en/visit/dali-theatre-museum/" },
+        perpignan: { area: "Centro histórico y Quai Vauban", pick: "Busca productos catalanes, espadrilles y textiles; en alimentación, miel y conservas regionales.", budget: "Comprueba origen y precio: no todo lo que parece artesanal se fabrica en la zona.", url: "https://www.perpignanmediterranee-tourisme.com/en/" },
+        collioure: { area: "Puerto y calles del casco antiguo", pick: "Anchoas de Collioure y pequeñas obras, láminas o postales inspiradas en el Fauvismo.", budget: "Compara tamaños de conserva y pregunta por producción local; el museo de arte está cerrado hasta 2028.", url: "https://www.tourisme-collioure.com/mon-collioure/les-incontournables-de-collioure/" },
+        montpellier: { area: "Écusson y calles peatonales", pick: "Busca cerámica, ilustración y objetos de diseñadores locales; mercados para miel, aceitunas y productos de Occitania.", budget: "Las calles comerciales están cerca unas de otras: mira varias tiendas antes de decidir.", url: "https://www.montpellier-france.com/discover/a-thousand-years-of-history/visit/top-10-tips-for-a-successful-stay/" },
+        carcassonne: { area: "Bastide Saint-Louis y tiendas de la Cité", pick: "Conservas de cassoulet, productos del Aude y recuerdos de talleres locales.", budget: "Los precios dentro de la ciudadela suelen ser turísticos; compara en la ciudad baja.", url: "https://whc.unesco.org/en/list/345/" },
+        lyon: { area: "Presqu'île y talleres de Croix-Rousse", pick: "Busca seda de Lyon en talleres identificables y pralines roses en una pastelería local.", budget: "Pregunta dónde se fabrica la seda y compara formatos de pralines; Croix-Rousse tiene cuestas.", url: "https://en.visiterlyon.com/" },
+        andorra: { area: "Avinguda Meritxell y Barri Antic", pick: "Compara perfumería, electrónica y productos de montaña con precios de casa, garantía y aduanas.", budget: "No des por hecho que todo es más barato: revisa límites de franquicia y garantía antes de comprar.", url: "https://visitandorra.com/en/" },
+        madrid: { area: "Centro y mercados de barrio", pick: "Busca cerámica, abanicos o artículos de pequeños talleres; El Rastro solo si coincide con domingo y está confirmado.", budget: "Los recuerdos se concentran en zonas turísticas; compara en tiendas de barrio.", url: "https://www.esmadrid.com/en" }
+      };
+
+      const railStayIdeas = [
+        { id: "perpignan", kicker: "La puerta más cercana", title: "Perpiñán + opción Collioure", nights: "1–2 noches", route: "Barcelona–Perpiñán: desde 1 h 26 min; desde 35 € por trayecto en la búsqueda actual. Collioure añade TER.", note: "Mejor combinación de ciudad y costa; evita apretar el cambio de tren el mismo día." },
+        { id: "montpellier", kicker: "Plazas y callejones", title: "Montpellier", nights: "2 noches", route: "Barcelona–Montpellier: desde 3 h 17 min; desde 39 € por trayecto en la búsqueda actual.", note: "Centro peatonal y tranvía. Los precios mostrados son referencias de noviembre de 2026, no de tus fechas." },
+        { id: "carcassonne", kicker: "Murallas medievales", title: "Carcasona", nights: "2 noches", route: "Barcelona–Carcasona: conexión desde unos 3 h 13 min; tarifa variable.", note: "Una conexión larga para hacerlo en el día, y la ciudadela suma cuestas y piedra irregular." },
+        { id: "lyon", kicker: "Gran escapada urbana", title: "Lyon", nights: "2–3 noches", route: "Barcelona–Lyon: desde 5 h 14 min y desde 59 € por trayecto en la búsqueda actual.", note: "Vieux Lyon, seda y gastronomía; no la recomiendo como ida y vuelta diaria desde Sant Celoni." }
+      ];
+
       const API_URL = "https://lsanhueza.oph.st/webhook/rumbo-lento/v1";
       let destinations = localDestinations;
       let latestApiRequest = 0;
       let map;
       let markers = {};
       let toastTimer;
+      let planItems = [];
       const money = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+      const moneyExact = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const formatMoney = (value) => Number.isInteger(value) ? money.format(value) : moneyExact.format(value);
+      const PLAN_STORAGE_KEY = "rumboLentoItinerary";
+      const TRIP_START = "2027-01-29";
+      const TRIP_END = "2027-02-14";
+      const BLOCKED_DATES = new Set(["2027-02-06", "2027-02-07", "2027-02-08"]);
 
       const $ = (id) => document.getElementById(id);
       const activeTravelerCount = () => Number($("travelerCount").value);
-      const estimatedCost = (destination) => destination.transportCost === null ? null : destination.transportCost + destination.visitCost;
+      const estimatedCost = (destination) => Number.isFinite(destination.apiCostPerPerson)
+        ? destination.apiCostPerPerson
+        : destination.transportCost === null ? null : destination.transportCost + destination.visitCost;
 
       function escapeHtml(value) {
         return String(value).replace(/[&<>"']/g, (character) => ({
@@ -632,11 +1038,18 @@
         })[character]);
       }
 
+      function renderPhotoCredit(photo) {
+        const label = photo && (photo.credit || photo.label);
+        const url = photo && (photo.creditUrl || photo.url);
+        return label && url
+          ? `<figcaption class="photo-credit">Foto: <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a></figcaption>`
+          : "";
+      }
+
       function matchesFilters(destination) {
         const cost = estimatedCost(destination);
         const budget = Number($("maxBudget").value);
         if (cost !== null && cost > budget) return false;
-        if (cost === null) return false;
         const interest = $("interestSelect").value;
         if (interest !== "all" && !destination.tags.includes(interest)) return false;
         if ($("easyOnly").checked && destination.effort > 1) return false;
@@ -658,31 +1071,351 @@
         }
         grid.innerHTML = filtered.map((destination) => {
           const cost = estimatedCost(destination);
-          const groupCost = cost === null ? "Por cotizar" : money.format(cost * count);
+          const groupCost = cost === null ? "Por cotizar" : formatMoney(cost * count);
           return `<article class="destination-card">
             <div class="card-image" style="background-image:url('${destination.image}')">
-              <span class="card-label">${destination.category}</span><div class="card-title">${destination.name}</div>
+              <span class="card-label">${escapeHtml(destination.category)}</span>
+              ${destination.photoCredit ? `<a class="photo-credit card-photo-credit" href="${escapeHtml(destination.photoCredit.url)}" target="_blank" rel="noopener noreferrer">Foto: ${escapeHtml(destination.photoCredit.label)}</a>` : ""}
+              <button class="card-title card-title-button" type="button" data-detail="${escapeHtml(destination.id)}" aria-label="Ver actividades de ${escapeHtml(destination.name)}">${escapeHtml(destination.name)} ↗</button>
             </div>
             <div class="card-body">
               <div class="card-meta"><span>◷ ${destination.hours}</span><span>↗ ${destination.transport}</span><span>${destination.effort === 1 ? "Paseo tranquilo" : "Ritmo moderado"}</span></div>
-              <p>${destination.summary}</p>
+              <p>${escapeHtml(destination.summary)}</p>
               <div class="card-cost">
-                <div><small>Por persona · transporte + visita</small><strong>${cost === null ? "Por cotizar" : money.format(cost)}</strong></div>
+                <div><small>Por persona · transporte + visita</small><strong>${cost === null ? "Por cotizar" : formatMoney(cost)}</strong></div>
                 <div class="group-cost"><small>Grupo (${count})</small><strong>${groupCost}</strong></div>
               </div>
-              <div class="card-meta" style="margin-top:7px">${destination.note}</div>
+              <div class="card-meta" style="margin-top:7px">${escapeHtml(destination.note)}</div>
+              ${cost === null ? '<div class="unknown-cost-note">Tarifa total sin cotizar · no se oculta con el filtro de presupuesto</div>' : ""}
               <div class="card-actions">
                 <button class="button small-outline" type="button" data-map="${destination.id}">Ver en mapa</button>
-                <button class="button" type="button" data-add="${destination.id}">Sumar al plan ＋</button>
+                <button class="button" type="button" data-detail="${destination.id}">Ver actividades</button>
               </div>
             </div>
           </article>`;
         }).join("");
-        grid.querySelectorAll("[data-map]").forEach((button) => button.addEventListener("click", () => focusDestination(button.dataset.map)));
-        grid.querySelectorAll("[data-add]").forEach((button) => button.addEventListener("click", () => {
-          const destination = destinations.find((item) => item.id === button.dataset.add);
-          showToast(destination.name + " añadido a tu idea de viaje.");
-        }));
+      }
+
+      function renderRailStayIdeas() {
+        $("railStayGrid").innerHTML = railStayIdeas.map((idea) => {
+          const destination = localDestinations.find((place) => place.id === idea.id);
+          const detail = destinationDetails[idea.id];
+          const credit = destination.photoCredit
+            ? `<span class="photo-credit"><a href="${escapeHtml(destination.photoCredit.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(destination.photoCredit.label)}</a></span>`
+            : "";
+          return `<article class="rail-stay-card">
+            <div class="rail-stay-photo"><img src="${escapeHtml(destination.image)}" alt="Vista de ${escapeHtml(destination.name)}" loading="lazy">${credit}</div>
+            <div class="rail-stay-card-body">
+              <span class="eyebrow">${escapeHtml(idea.kicker)}</span>
+              <h3>${escapeHtml(idea.title)} · ${escapeHtml(idea.nights)}</h3>
+              <p><strong>${escapeHtml(idea.route)}</strong></p>
+              <p>${escapeHtml(idea.note)}</p>
+              <a href="#destino/${escapeHtml(idea.id)}">Abrir guía, horarios e ideas caminables ↗</a>
+              ${detail.railUrl ? `<a class="rail-ticket-link" href="${escapeHtml(detail.railUrl)}" target="_blank" rel="noopener noreferrer">Consultar ruta y billetes ↗</a>` : ""}
+            </div>
+          </article>`;
+        }).join("");
+      }
+
+      function renderShoppingIdeas() {
+        $("shoppingGrid").innerHTML = Object.keys(shoppingIdeas).map((id) => {
+          const destination = localDestinations.find((place) => place.id === id);
+          const idea = shoppingIdeas[id];
+          const credit = destination.photoCredit
+            ? `<span class="photo-credit"><a href="${escapeHtml(destination.photoCredit.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(destination.photoCredit.label)}</a></span>`
+            : "";
+          return `<article class="shopping-card">
+            <div class="shopping-photo"><img src="${escapeHtml(destination.image)}" alt="Vista de ${escapeHtml(destination.name)}" loading="lazy">${credit}</div>
+            <div class="shopping-card-body">
+              <h3>${escapeHtml(destination.name)}</h3>
+              <p><strong>${escapeHtml(idea.area)}.</strong> ${escapeHtml(idea.pick)}</p>
+              <small>${escapeHtml(idea.budget)}</small>
+              <a class="shopping-source" href="${escapeHtml(idea.url)}" target="_blank" rel="noopener noreferrer">Ver información local ↗</a>
+            </div>
+          </article>`;
+        }).join("");
+      }
+
+      function isValidPlanDate(date) {
+        if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+        const parsedDate = new Date(date + "T00:00:00Z");
+        return !Number.isNaN(parsedDate.getTime()) && parsedDate.toISOString().slice(0, 10) === date &&
+          date >= TRIP_START && date <= TRIP_END && !BLOCKED_DATES.has(date);
+      }
+
+      function formatPlanDate(date) {
+        return new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "long", year: "numeric" })
+          .format(new Date(date + "T12:00:00"));
+      }
+
+      function getActivity(destinationId, activityId) {
+        const detail = destinationDetails[destinationId];
+        if (!detail) return null;
+        const activity = detail.activities.find((item) => item.id === activityId);
+        if (activity) return activity;
+        const option = (detail.ticketOptions || []).find((item) => item.id === activityId);
+        return option ? {
+          ...option,
+          type: "Pase combinado",
+          duration: "Día completo",
+          cost: option.priceFrom,
+          costLabel: `Desde ${formatMoney(option.priceFrom)} por persona · válido desde Barcelona`,
+          sourceUrl: option.url,
+          alternativeGroup: "montserrat-pass",
+          replacesTransportEstimate: true,
+          isFromPrice: true
+        } : null;
+      }
+
+      function getPackageIncludingActivity(destinationId, activityId, date) {
+        const activity = getActivity(destinationId, activityId);
+        if (!activity || !activity.includedByPackage) return null;
+        return planItems.find((item) => {
+          if (item.destinationId !== destinationId || item.date !== date) return false;
+          const packageOption = getActivity(item.destinationId, item.activityId);
+          return packageOption && packageOption.includedActivities && packageOption.includedActivities.includes(activityId);
+        }) || null;
+      }
+
+      function loadPlan() {
+        try {
+          const saved = JSON.parse(localStorage.getItem(PLAN_STORAGE_KEY) || "[]");
+          if (!Array.isArray(saved)) throw new Error("El formato guardado no es una lista");
+          planItems = saved.filter((item) =>
+            item && typeof item.destinationId === "string" &&
+            localDestinations.some((destination) => destination.id === item.destinationId) &&
+            typeof item.activityId === "string" && getActivity(item.destinationId, item.activityId) &&
+            isValidPlanDate(item.date)
+          );
+          sortPlanItems();
+        } catch (error) {
+          planItems = [];
+          $("planStatus").textContent = "No se pudo leer el itinerario guardado; puedes crear uno nuevo.";
+          console.warn("No se pudo leer el itinerario de Rumbo Lento desde este dispositivo.", error);
+        }
+      }
+
+      function savePlan() {
+        try {
+          localStorage.setItem(PLAN_STORAGE_KEY, JSON.stringify(planItems));
+          $("planStatus").textContent = "El itinerario se guarda solo en este dispositivo.";
+        } catch (error) {
+          $("planStatus").textContent = "No se pudo guardar en este dispositivo; el plan solo estará disponible mientras esta página siga abierta.";
+          console.warn("No se pudo guardar el itinerario de Rumbo Lento.", error);
+        }
+      }
+
+      function sortPlanItems() {
+        planItems.sort((first, second) => first.date.localeCompare(second.date));
+      }
+
+      function renderPlan() {
+        const count = activeTravelerCount();
+        const list = $("planList");
+        $("planCount").textContent = String(planItems.length);
+
+        if (!planItems.length) {
+          $("planSummary").innerHTML = '<h3>Tu presupuesto</h3><p class="plan-total">Aún no has añadido actividades.</p>';
+          list.innerHTML = '<div class="empty-state">Abre una ficha de destino y añade una actividad para empezar tu paseo.</div>';
+          return;
+        }
+
+        const destinationsInPlan = new Map();
+        let activityCostPerPerson = 0;
+        let unknownActivityCosts = 0;
+        planItems.forEach((item) => {
+          const destination = destinations.find((place) => place.id === item.destinationId) ||
+            localDestinations.find((place) => place.id === item.destinationId);
+          const activity = getActivity(item.destinationId, item.activityId);
+          if (!destinationsInPlan.has(item.destinationId)) {
+            const hasCombinedPass = planItems.some((plannedItem) => {
+              if (plannedItem.destinationId !== item.destinationId) return false;
+              const plannedActivity = getActivity(plannedItem.destinationId, plannedItem.activityId);
+              return plannedActivity && plannedActivity.replacesTransportEstimate;
+            });
+            destinationsInPlan.set(item.destinationId, {
+              destination,
+              transportCost: hasCombinedPass ? null : destination && Number.isFinite(destination.transportCost) ? destination.transportCost : null
+            });
+          }
+          if (getPackageIncludingActivity(item.destinationId, item.activityId, item.date)) return;
+          if (activity.cost === null) unknownActivityCosts += 1;
+          else activityCostPerPerson += activity.cost;
+        });
+
+        let transportCostPerPerson = 0;
+        let unknownTransportCosts = 0;
+        destinationsInPlan.forEach((entry) => {
+          if (entry.transportCost === null) unknownTransportCosts += 1;
+          else transportCostPerPerson += entry.transportCost;
+        });
+        const knownTotalPerPerson = transportCostPerPerson + activityCostPerPerson;
+        const unknownCosts = unknownActivityCosts + unknownTransportCosts;
+        $("planSummary").innerHTML = `<h3>Tu presupuesto orientativo</h3>
+          <div class="plan-total">Transporte estimado · una vez por destino<strong>${unknownTransportCosts ? `${formatMoney(transportCostPerPerson)} conocido · ${unknownTransportCosts} tramo${unknownTransportCosts === 1 ? "" : "s"} por confirmar` : `${formatMoney(transportCostPerPerson)} por persona`}</strong></div>
+          <div class="plan-total">Actividades con coste conocido<strong>${formatMoney(activityCostPerPerson)} por persona</strong></div>
+          <div class="plan-total"><strong class="plan-total-main">${formatMoney(knownTotalPerPerson * count)}</strong><strong>total conocido para ${count} ${count === 1 ? "persona" : "personas"}</strong></div>
+          <p class="plan-total">${destinationsInPlan.size} ${destinationsInPlan.size === 1 ? "destino" : "destinos"} · ${planItems.length} ${planItems.length === 1 ? "actividad" : "actividades"}.${unknownCosts ? ` ${unknownCosts} coste${unknownCosts === 1 ? "" : "s"} por confirmar, no incluido${unknownCosts === 1 ? "" : "s"}.` : ""} Las tarifas son orientativas.</p>
+          <p class="plan-total">No incluye alojamiento, comidas, compras ni visitas con entrada no valorada.</p>
+          <button class="plan-clear" type="button" data-clear-plan>Vaciar mi paseo</button>`;
+
+        list.innerHTML = planItems.map((item, index) => {
+          const destination = localDestinations.find((place) => place.id === item.destinationId);
+          const activity = getActivity(item.destinationId, item.activityId);
+          const includedIn = getPackageIncludingActivity(item.destinationId, item.activityId, item.date);
+          const includedBy = includedIn && getActivity(item.destinationId, includedIn.activityId);
+          const costLabel = includedBy ? `Incluida en ${includedBy.name}` : activity.costLabel;
+          return `<article class="plan-item">
+            <div>
+              <span class="activity-type">${escapeHtml(destination.name)} · ${escapeHtml(activity.type)}</span>
+              <h3>${escapeHtml(activity.name)}</h3>
+              <p>${escapeHtml(formatPlanDate(item.date))} · ${escapeHtml(activity.duration)} · ${escapeHtml(costLabel)}</p>
+            </div>
+            <div class="plan-item-side">
+              <label class="sr-only" for="plan-date-${index}">Fecha para ${escapeHtml(activity.name)}</label>
+              <input id="plan-date-${index}" type="date" min="${TRIP_START}" max="${TRIP_END}" value="${escapeHtml(item.date)}" data-plan-date="${index}" aria-label="Cambiar fecha de ${escapeHtml(activity.name)}">
+              <button class="plan-remove" type="button" data-remove-plan="${index}">Quitar</button>
+            </div>
+          </article>`;
+        }).join("");
+      }
+
+      let selectedPlanDate = TRIP_START;
+
+      function renderDestinationDetail(id) {
+        const destination = localDestinations.find((place) => place.id === id);
+        const detail = destinationDetails[id];
+        if (!destination || !detail) {
+          $("destinationPage").innerHTML = '<div class="detail-shell"><a class="button small-outline" href="#explorar">← Volver a destinos</a><p class="empty-state">No encontramos esa localidad.</p></div>';
+          return;
+        }
+
+        const current = destinations.find((place) => place.id === id) || destination;
+        const dateAvailable = isValidPlanDate(selectedPlanDate);
+        const alreadyAdded = (activityId) => planItems.some((item) =>
+          item.destinationId === id && item.activityId === activityId && item.date === selectedPlanDate
+        );
+        const alternativeSelected = (activity) => activity.alternativeGroup && planItems.some((item) => {
+          if (item.destinationId !== id || item.date !== selectedPlanDate || item.activityId === activity.id) return false;
+          const chosen = getActivity(item.destinationId, item.activityId);
+          return chosen && chosen.alternativeGroup === activity.alternativeGroup;
+        });
+        const viatorUrl = "https://www.viator.com/searchResults/all?text=" + encodeURIComponent(destination.name);
+        const railContext = detail.railNote ? `<aside class="rail-context">${escapeHtml(detail.railNote)}${detail.railUrl ? ` <a href="${escapeHtml(detail.railUrl)}" target="_blank" rel="noopener noreferrer">Ver ruta en el operador ↗</a>` : ""}</aside>` : "";
+        const dayPlanMarkup = detail.dayPlan ? `<section class="day-plan">
+          <h2>Un día bonito, a ritmo tranquilo</h2>
+          <p class="day-plan-intro">Propuesta por franjas basada en los lugares más emblemáticos que destaca la información turística local; no es un ranking de reseñas. Confirma aperturas y ajusta los tramos según energía, clima y movilidad.</p>
+          <div class="daypart-grid">${detail.dayPlan.map((part, index) => {
+            const gallery = detail.photos || [];
+            const photo = gallery[Number.isInteger(part.photoIndex) ? part.photoIndex : index % Math.max(gallery.length, 1)] || { url: destination.image, alt: `Vista de ${destination.name}` };
+            return `<article class="daypart-card">
+              <figure><img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.alt)}" loading="lazy" decoding="async">${renderPhotoCredit(photo)}</figure>
+              <div class="daypart-card-body"><span class="daypart-time">${escapeHtml(part.time)}</span><h3>${escapeHtml(part.title)}</h3><p>${escapeHtml(part.description)}</p><p class="rest-tip"><strong>Pausa y comodidad:</strong> ${escapeHtml(part.rest)}</p></div>
+            </article>`;
+          }).join("")}</div>
+        </section>` : "";
+        const shoppingIdea = shoppingIdeas[id];
+        const shoppingDetail = shoppingIdea ? `<section class="destination-shopping">
+          <h2>Compras recomendadas en ${escapeHtml(destination.name)}</h2>
+          <p><strong>${escapeHtml(shoppingIdea.area)}:</strong> ${escapeHtml(shoppingIdea.pick)}</p>
+          <p><strong>Consejo para gastar menos:</strong> ${escapeHtml(shoppingIdea.budget)}</p>
+          <a href="${escapeHtml(shoppingIdea.url)}" target="_blank" rel="noopener noreferrer">Consultar información local ↗</a>
+        </section>` : "";
+        const ticketOptions = (detail.ticketOptions || []).map((option) => {
+          const activity = getActivity(id, option.id);
+          const added = alreadyAdded(option.id);
+          const otherPassSelected = alternativeSelected(activity);
+          const disabled = !dateAvailable || added || otherPassSelected;
+          const buttonLabel = !dateAvailable ? "Elige un día disponible" : added ? "Ya está en Mi paseo ✓" : otherPassSelected ? "Elige solo un pase combinado" : "Añadir este pase ＋";
+          return `<article class="ticket-option">
+            <h3>${escapeHtml(option.name)}</h3>
+            <span class="ticket-option-price">Desde ${formatMoney(option.priceFrom)} / persona</span>
+            <p>${escapeHtml(option.includes)}<br><strong>Referencia de grupo (${activeTravelerCount()}):</strong> desde ${formatMoney(option.priceFrom * activeTravelerCount())}</p>
+            <a href="${escapeHtml(option.url)}" target="_blank" rel="noopener noreferrer">Consultar disponibilidad y comprar ↗</a>
+            <button class="button" type="button" data-add-activity="${escapeHtml(option.id)}" ${disabled ? "disabled" : ""}>${buttonLabel}</button>
+          </article>`;
+        }).join("");
+        $("destinationPage").innerHTML = `<div class="detail-shell">
+          <div class="detail-top">
+            <a class="button small-outline" href="#explorar">← Volver a destinos</a>
+            <a class="button small-outline" href="#mi-paseo">Mi paseo · ${planItems.length}</a>
+            <button class="button" type="button" data-map="${escapeHtml(id)}">Ver en el mapa</button>
+          </div>
+          <section class="detail-hero" style="background-image:url('${escapeHtml(destination.image)}')">
+            <div class="detail-hero-content">
+              <span class="eyebrow">${escapeHtml(destination.category)}</span>
+              <h1>${escapeHtml(destination.name)}</h1>
+              <p>${escapeHtml(destination.summary)}</p>
+              <div class="detail-meta"><span>${escapeHtml(current.transport)}</span><span>${escapeHtml(current.hours)}</span><span>${current.effort === 1 ? "Ritmo tranquilo" : "Ritmo moderado"}</span></div>
+            </div>
+            ${destination.photoCredit ? `<a class="photo-credit hero-photo-credit" href="${escapeHtml(destination.photoCredit.url)}" target="_blank" rel="noopener noreferrer">Foto: ${escapeHtml(destination.photoCredit.label)}</a>` : ""}
+          </section>
+          ${railContext}
+          <div class="detail-columns">
+            <section class="detail-panel"><h2>Qué ver y hacer</h2><ul>${detail.highlights.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></section>
+            <section class="detail-panel"><h2>Gastronomía y ahorro</h2><ul>${detail.food.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul><p class="detail-access"><strong>Ritmo y acceso:</strong> ${escapeHtml(detail.access)}</p></section>
+          </div>
+          ${dayPlanMarkup}
+          ${shoppingDetail}
+          ${ticketOptions ? `<section class="ticket-options">
+            <div class="ticket-options-head"><div><span class="eyebrow">Tarifa oficial · consultada ${escapeHtml(detail.priceCheckedOn)}</span><h2>Compara los pases de Montserrat</h2><p>Selecciona como máximo un pase por día. Se sumará a Mi paseo solo si lo añades.</p></div></div>
+            <div class="ticket-grid">${ticketOptions}</div>
+            <p class="ticket-options-note">El total del grupo multiplica la tarifa “desde” por viajeros; edades y condiciones pueden cambiarlo. El pase comienza en Barcelona: falta el trayecto desde Sant Celoni, que queda como coste por confirmar. Confirma la tarifa y operativa para 2027.</p>
+          </section>` : ""}
+          <section class="detail-activities">
+            <div class="detail-date-row">
+              <div><div class="experience-heading"><h2>Experiencias para sumar</h2><a class="experience-guide-link" href="${escapeHtml(viatorUrl)}" target="_blank" rel="noopener noreferrer">Comparar tours en Viator ↗</a></div><p>1. Elige el día. 2. Pulsa “Añadir a mi itinerario” en cada experiencia. El destino no se agrega hasta que elijas algo; luego puedes revisar o quitarlo en Mi paseo.</p><p>Solo se aceptan fechas del 29 de enero al 14 de febrero de 2027, excepto el 6–8 de febrero.</p></div>
+              <label class="detail-date-control" for="activityDate">Día de la actividad
+                <input id="activityDate" type="date" min="${TRIP_START}" max="${TRIP_END}" value="${escapeHtml(selectedPlanDate)}">
+              </label>
+            </div>
+            <div class="activity-grid">${detail.activities.map((activity, activityIndex) => {
+              const gallery = detail.photos || [];
+              const photo = activity.image
+                ? { url: activity.image, alt: activity.imageAlt || activity.name, credit: activity.photoCredit, creditUrl: activity.photoCreditUrl }
+                : gallery[Number.isInteger(activity.photoIndex) ? activity.photoIndex : activityIndex % Math.max(gallery.length, 1)] || { url: destination.image, alt: `Vista de ${destination.name}` };
+              const added = alreadyAdded(activity.id);
+              const includedPackage = getPackageIncludingActivity(id, activity.id, selectedPlanDate);
+              const includedPackageActivity = includedPackage && getActivity(id, includedPackage.activityId);
+              const included = Boolean(includedPackage);
+              const disabled = !dateAvailable || added || included || alternativeSelected(activity);
+              const buttonLabel = !dateAvailable ? "Elige un día disponible" : added ? "Ya está en Mi paseo ✓" : included ? `Incluida en ${includedPackageActivity.name} ✓` : alternativeSelected(activity) ? "Elige solo un pase combinado" : "Añadir a mi itinerario ＋";
+              return `<article class="activity-card">
+                <figure class="activity-photo"><img src="${escapeHtml(photo.url)}" alt="${escapeHtml(photo.alt)}" loading="lazy" decoding="async">${renderPhotoCredit(photo)}</figure>
+                <span class="activity-type">${escapeHtml(activity.type)} · ${escapeHtml(activity.duration)}</span>
+                <h3>${escapeHtml(activity.name)}</h3>
+                <p>${escapeHtml(activity.description)}</p>
+                <div class="activity-price"><small>Precio por persona</small><strong>${included ? `Incluida en ${escapeHtml(includedPackageActivity.name)}` : activity.cost === null ? "Por confirmar" : activity.cost === 0 ? "Gratis" : formatMoney(activity.cost)}</strong><small>${escapeHtml(activity.costLabel)}</small></div>
+                <a class="experience-source" href="${escapeHtml(activity.sourceUrl || detail.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escapeHtml(activity.sourceLabel || "Ver operador, horarios y tarifas ↗")}</a>
+                <button class="button" type="button" data-add-activity="${escapeHtml(activity.id)}" ${disabled ? "disabled" : ""}>${buttonLabel}</button>
+              </article>`;
+            }).join("")}</div>
+            <p class="detail-note">Las referencias de SNCF, Dalí, Montserrat y Carcasona se consultaron en fuentes oficiales el 23/11/2026; no garantizan la tarifa ni el horario de enero–febrero de 2027. Las rutas internacionales parten de Barcelona Sants y no incluyen Sant Celoni–Barcelona. El resto de tarifas privadas o entradas queda pendiente. Los enlaces a tours muestran ofertas por fecha y no se suman al presupuesto.</p>
+          </section>
+        </div>`;
+      }
+
+      function handleRoute() {
+        const detailMatch = window.location.hash.match(/^#destino\/([a-z0-9-]+)$/);
+        const detailPage = $("destinationPage");
+        const homeSections = document.querySelectorAll("main > section:not(#destinationPage)");
+        const footer = document.querySelector("footer");
+        if (detailMatch) {
+          document.body.classList.add("detail-mode");
+          homeSections.forEach((section) => { section.hidden = true; });
+          detailPage.hidden = false;
+          footer.hidden = true;
+          renderDestinationDetail(detailMatch[1]);
+          window.scrollTo(0, 0);
+          return;
+        }
+
+        document.body.classList.remove("detail-mode");
+        detailPage.hidden = true;
+        homeSections.forEach((section) => { section.hidden = false; });
+        footer.hidden = false;
+        const target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+        if (target) window.requestAnimationFrame(() => target.scrollIntoView({ behavior: "smooth" }));
       }
 
       async function loadApiDestinations() {
@@ -704,7 +1437,7 @@
           )) throw new Error("Respuesta de catálogo no válida");
           if (requestId !== latestApiRequest) return;
 
-          destinations = data.destinations.map((item) => {
+          const apiDestinations = data.destinations.map((item) => {
             const local = localDestinations.find((destination) => destination.id === item.id);
             if (!local) return null;
             return {
@@ -715,19 +1448,26 @@
               hours: item.hours || local.hours,
               effort: Number.isFinite(item.effort) ? item.effort : local.effort,
               tags: Array.isArray(item.tags) ? item.tags : local.tags,
-              transportCost: Number.isFinite(item.costPerPerson) ? item.costPerPerson : null,
-              visitCost: 0,
+              transportCost: local.transportCost,
+              visitCost: local.visitCost,
+              apiCostPerPerson: item.costPerPerson,
               note: item.priceStatus === "demo" ? "Coste de muestra · confirmar antes de reservar" : "Estimación del catálogo"
             };
           }).filter(Boolean);
+          const apiIds = new Set(apiDestinations.map((destination) => destination.id));
+          destinations = apiDestinations.concat(localDestinations.filter((destination) =>
+            destination.localOnly && !apiIds.has(destination.id)
+          ));
           $("apiStatus").textContent = "API conectada · costes de muestra";
           renderDestinations();
+          renderPlan();
         } catch (error) {
           if (requestId !== latestApiRequest) return;
           destinations = localDestinations;
           $("apiStatus").textContent = "Modo local · API no disponible";
           console.warn("No se pudo actualizar el catálogo de Rumbo Lento; se muestran los datos locales.", error);
           renderDestinations();
+          renderPlan();
         }
       }
 
@@ -752,6 +1492,118 @@
         }, 350);
       }
 
+      document.addEventListener("click", (event) => {
+        const detailButton = event.target.closest("[data-detail]");
+        if (detailButton) {
+          window.location.hash = "destino/" + detailButton.dataset.detail;
+          return;
+        }
+
+        const mapButton = event.target.closest("[data-map]");
+        if (mapButton) {
+          const id = mapButton.dataset.map;
+          if (!$("destinationPage").hidden) {
+            window.location.hash = "mapa";
+            window.setTimeout(() => focusDestination(id), 60);
+          } else {
+            focusDestination(id);
+          }
+          return;
+        }
+
+        const addButton = event.target.closest("[data-add-activity]");
+        if (addButton) {
+          const match = window.location.hash.match(/^#destino\/([a-z0-9-]+)$/);
+          const destinationId = match && match[1];
+          const activityId = addButton.dataset.addActivity;
+          if (!destinationId || !getActivity(destinationId, activityId)) return;
+          if (!isValidPlanDate(selectedPlanDate)) {
+            showToast("Elige una fecha disponible; del 6 al 8 de febrero no se planifican salidas.");
+            return;
+          }
+          const activity = getActivity(destinationId, activityId);
+          if (activity.alternativeGroup && planItems.some((item) => {
+            if (item.destinationId !== destinationId || item.date !== selectedPlanDate) return false;
+            const selectedActivity = getActivity(item.destinationId, item.activityId);
+            return selectedActivity && selectedActivity.alternativeGroup === activity.alternativeGroup;
+          })) {
+            showToast("Para ese día elige solo uno de los pases combinados.");
+            return;
+          }
+          if (getPackageIncludingActivity(destinationId, activityId, selectedPlanDate)) {
+            showToast("Esta actividad ya está incluida en el pase combinado elegido.");
+            return;
+          }
+          if (planItems.some((item) => item.destinationId === destinationId && item.activityId === activityId && item.date === selectedPlanDate)) return;
+          planItems.push({ destinationId, activityId, date: selectedPlanDate });
+          sortPlanItems();
+          savePlan();
+          renderPlan();
+          renderDestinationDetail(destinationId);
+          showToast("Actividad añadida a Mi paseo.");
+          return;
+        }
+
+        const removeButton = event.target.closest("[data-remove-plan]");
+        if (removeButton) {
+          planItems.splice(Number(removeButton.dataset.removePlan), 1);
+          savePlan();
+          renderPlan();
+          return;
+        }
+
+        const clearButton = event.target.closest("[data-clear-plan]");
+        if (clearButton) {
+          planItems = [];
+          savePlan();
+          renderPlan();
+        }
+      });
+
+      document.addEventListener("change", (event) => {
+        if (event.target.id === "activityDate") {
+          if (!isValidPlanDate(event.target.value)) {
+            showToast("La fecha debe estar entre el 29 de enero y el 14 de febrero, excepto del 6 al 8.");
+            selectedPlanDate = "";
+            event.target.value = "";
+            const match = window.location.hash.match(/^#destino\/([a-z0-9-]+)$/);
+            if (match) renderDestinationDetail(match[1]);
+            return;
+          }
+          selectedPlanDate = event.target.value;
+          const match = window.location.hash.match(/^#destino\/([a-z0-9-]+)$/);
+          if (match) renderDestinationDetail(match[1]);
+          return;
+        }
+
+        if (event.target.matches("[data-plan-date]")) {
+          const index = Number(event.target.dataset.planDate);
+          const date = event.target.value;
+          if (!isValidPlanDate(date)) {
+            showToast("Elige una fecha disponible fuera del 6 al 8 de febrero.");
+            renderPlan();
+            return;
+          }
+          if (planItems[index]) {
+            const movingActivity = getActivity(planItems[index].destinationId, planItems[index].activityId);
+            const conflicts = movingActivity.alternativeGroup && planItems.some((item, itemIndex) => {
+              if (itemIndex === index || item.destinationId !== planItems[index].destinationId || item.date !== date) return false;
+              const otherActivity = getActivity(item.destinationId, item.activityId);
+              return otherActivity && otherActivity.alternativeGroup === movingActivity.alternativeGroup;
+            });
+            if (conflicts) {
+              showToast("No puedes programar dos pases combinados el mismo día.");
+              renderPlan();
+              return;
+            }
+            planItems[index].date = date;
+            sortPlanItems();
+            savePlan();
+            renderPlan();
+          }
+        }
+      });
+
       function setupMap() {
         const fallback = $("mapFallback");
         if (!window.L) {
@@ -771,7 +1623,7 @@
           const marker = L.circleMarker(destination.coords, {
             radius: 7, color: "#fff", weight: 2, fillColor: "#638273", fillOpacity: .95
           }).addTo(map);
-          marker.bindPopup(`<div class="popup-title">${escapeHtml(destination.name)}</div><div class="popup-copy">${escapeHtml(destination.summary)}</div>`);
+          marker.bindPopup(`<div class="popup-title">${escapeHtml(destination.name)}</div><div class="popup-copy">${escapeHtml(destination.summary)}</div><a class="popup-link" href="#destino/${escapeHtml(destination.id)}">Ver ficha y actividades ↗</a>`);
           markers[destination.id] = marker;
         });
       }
@@ -780,6 +1632,7 @@
         const value = Number(event.target.value);
         event.target.value = String(Number.isInteger(value) ? Math.min(9, Math.max(1, value)) : 1);
         renderDestinations();
+        renderPlan();
         loadApiDestinations();
       });
       $("maxBudget").addEventListener("input", () => {
@@ -809,8 +1662,14 @@
         $("menuButton").setAttribute("aria-expanded", "false");
       }));
 
+      window.addEventListener("hashchange", handleRoute);
+      loadPlan();
+      renderRailStayIdeas();
+      renderShoppingIdeas();
       renderDestinations();
+      renderPlan();
       setupMap();
+      handleRoute();
       loadApiDestinations();
     })();
   </script>
